@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'calendar_screen.dart';
+import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/add_city_bottom_sheet.dart';
@@ -21,17 +22,8 @@ class LocationsScreen extends StatefulWidget {
 
 class _LocationsScreenState extends State<LocationsScreen> {
   final TextEditingController _searchController = TextEditingController();
+  WeatherController get _controller => WeatherController.instance;
   String _searchQuery = '';
-
-  // Local state for current location and saved cities
-  CityWeather _currentLocation = CityWeather.currentLocation;
-  late List<CityWeather> _savedCities;
-
-  @override
-  void initState() {
-    super.initState();
-    _savedCities = List.from(CityWeather.initialSavedCities);
-  }
 
   @override
   void dispose() {
@@ -59,11 +51,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return AddCityBottomSheet(
-          currentSavedCities: _savedCities,
+          currentSavedCities: _controller.savedCities,
           onCityAdded: (newCity) {
-            setState(() {
-              _savedCities.add(newCity.copyWith(isFavorite: false));
-            });
+            _controller.addSavedCity(newCity);
 
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -86,12 +76,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   void _onCityTap(CityWeather city) {
-    setState(() {
-      _currentLocation = city.copyWith(
-        isCurrentLocation: true,
-        localTime: 'Waktu lokal sekarang',
-      );
-    });
+    _controller.selectCity(city);
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -126,7 +111,11 @@ class _LocationsScreenState extends State<LocationsScreen> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Pengaturan lokasi cuaca'),
+        content: Text(
+          _controller.isUsingApiData
+              ? 'Sinkronisasi Lokasi dengan WeatherAPI.com Aktif'
+              : 'Pengaturan lokasi cuaca (Mode Demo)',
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -136,11 +125,12 @@ class _LocationsScreenState extends State<LocationsScreen> {
   }
 
   List<CityWeather> get _displayedCities {
+    final list = _controller.savedCities;
     if (_searchQuery.trim().isEmpty) {
-      return _savedCities;
+      return list;
     }
     final query = _searchQuery.toLowerCase();
-    return _savedCities.where((city) {
+    return list.where((city) {
       return city.cityName.toLowerCase().contains(query) ||
           city.country.toLowerCase().contains(query);
     }).toList();
@@ -148,218 +138,205 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final displayedList = _displayedCities;
+    return ListenableBuilder(
+      listenable: WeatherController.instance,
+      builder: (context, _) {
+        final displayedList = _displayedCities;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: AppBackground(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // Scrollable Content
-              Positioned.fill(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 110.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                    // 1. Top Header
-                    TopHeader(onSettingsTap: _onSettingsTap),
-
-                    // 2. Locations Header
-                    const LocationsHeader(),
-
-                    const SizedBox(height: 6),
-
-                    // 3. City Search Bar
-                    CitySearchBar(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      onClear: _onSearchClear,
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // 4. Current Location Card
-                    if (_searchQuery.isEmpty)
-                      CurrentLocationCard(city: _currentLocation),
-
-                    const SizedBox(height: 10),
-
-                    // 5. Saved Cities Section Header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0,
-                        vertical: 8.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: AppBackground(
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  // Scrollable Content
+                  Positioned.fill(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 110.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            _searchQuery.isEmpty
-                                ? 'Kota Tersimpan'
-                                : 'Hasil Pencarian (${displayedList.length})',
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.neutral,
-                              letterSpacing: -0.2,
-                            ),
+                          // 1. Top Header
+                          TopHeader(onSettingsTap: _onSettingsTap),
+
+                          // 2. Locations Header
+                          const LocationsHeader(),
+
+                          const SizedBox(height: 6),
+
+                          // 3. City Search Bar
+                          CitySearchBar(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            onClear: _onSearchClear,
                           ),
 
-                          // + Tambah Kota Button
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: _openAddCitySheet,
-                              borderRadius: BorderRadius.circular(16),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12.0,
-                                  vertical: 6.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Color(0xFF48CBE8),
-                                      Color(0xFF0284C7),
-                                    ],
+                          const SizedBox(height: 4),
+
+                          // 4. Current Location Card
+                          if (_searchQuery.isEmpty)
+                            CurrentLocationCard(
+                              city: _controller.currentLocationCity,
+                            ),
+
+                          const SizedBox(height: 10),
+
+                          // 5. Saved Cities Section Header
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0,
+                              vertical: 8.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _searchQuery.isEmpty
+                                      ? 'Kota Tersimpan'
+                                      : 'Hasil Pencarian (${displayedList.length})',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.neutral,
+                                    letterSpacing: -0.2,
                                   ),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withValues(
-                                        alpha: 0.35,
-                                      ),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.add_rounded,
-                                      size: 15,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Tambah Kota',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
+                                if (_searchQuery.isEmpty)
+                                  InkWell(
+                                    onTap: _openAddCitySheet,
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0,
+                                        vertical: 5.0,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.65),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: AppColors.glassBorder,
+                                          width: 0.8,
+                                        ),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.add_rounded,
+                                            size: 15,
+                                            color: AppColors.primary,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'Tambah Kota',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
 
-                    // 6. Saved Cities List
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: displayedList.isEmpty
-                          ? Container(
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 24.0,
-                              ),
-                              padding: const EdgeInsets.all(24.0),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: BorderRadius.circular(20.0),
-                                border: Border.all(
-                                  color: AppColors.border,
-                                  width: 1.0,
-                                ),
+                          // 6. Saved Cities List
+                          if (displayedList.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 36.0,
+                                horizontal: 20.0,
                               ),
                               child: Column(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.location_off_rounded,
-                                    size: 38,
-                                    color: AppColors.mutedText,
+                                    size: 48,
+                                    color: AppColors.mutedText.withValues(alpha: 0.5),
                                   ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    'Tidak ada kota yang cocok dengan "$_searchQuery"',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w600,
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Kota tidak ditemukan',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
                                       color: AppColors.neutral,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   const Text(
-                                    'Coba kata kunci lain atau gunakan tombol "Tambah Kota".',
+                                    'Coba gunakan kata kunci nama kota atau negara yang lain.',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 12.5,
                                       color: AppColors.mutedText,
                                     ),
                                   ),
                                 ],
                               ),
                             )
-                          : Column(
-                              children: List.generate(displayedList.length, (
-                                index,
-                              ) {
+                          else
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0,
+                                vertical: 4.0,
+                              ),
+                              itemCount: displayedList.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
                                 final city = displayedList[index];
                                 return SavedCityCard(
                                   city: city,
                                   onTap: () => _onCityTap(city),
                                 );
-                              }),
+                              },
                             ),
+
+                          const SizedBox(height: 14),
+                        ],
+                      ),
                     ),
-
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ),
-            ),
-
-            // Floating Bottom Navigation Bar (Locations is active = index 2)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.only(top: 14.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.background.withValues(alpha: 0.0),
-                      AppColors.background.withValues(alpha: 0.35),
-                      AppColors.background.withValues(alpha: 0.70),
-                    ],
-                    stops: const [0.0, 0.45, 1.0],
                   ),
-                ),
-                child: WeatherBottomNavigation(
-                  currentIndex: 2,
-                  onTap: _onNavTapped,
-                ),
+
+                  // Floating Bottom Navigation Bar (Locations is active = index 2)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.only(top: 14.0),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColors.background.withValues(alpha: 0.0),
+                            AppColors.background.withValues(alpha: 0.35),
+                            AppColors.background.withValues(alpha: 0.70),
+                          ],
+                          stops: const [0.0, 0.45, 1.0],
+                        ),
+                      ),
+                      child: WeatherBottomNavigation(
+                        currentIndex: 2,
+                        onTap: _onNavTapped,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
+          ),
+        );
+      },
+    );
+  }
 }

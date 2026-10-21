@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
 
@@ -35,18 +36,22 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
-    setState(() {
-      if (query.trim().isEmpty) {
-        _filteredCities = CityWeather.availableCitiesPool;
-      } else {
-        final lower = query.toLowerCase();
-        _filteredCities = CityWeather.availableCitiesPool.where((city) {
-          return city.cityName.toLowerCase().contains(lower) ||
-              city.country.toLowerCase().contains(lower);
-        }).toList();
+  void _onSearchChanged(String query) async {
+    if (query.trim().isEmpty) {
+      if (mounted) {
+        setState(() {
+          _filteredCities = CityWeather.availableCitiesPool;
+        });
       }
-    });
+      return;
+    }
+
+    final results = await WeatherController.instance.searchCities(query);
+    if (mounted) {
+      setState(() {
+        _filteredCities = results;
+      });
+    }
   }
 
   bool _isAlreadySaved(CityWeather city) {

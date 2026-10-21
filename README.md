@@ -128,6 +128,14 @@ WeatherMe/
 │   └── logo/                  # Berkas identitas visual dan logo aplikasi (WeatherMe.png)
 ├── ios/                       # Konfigurasi proyek native untuk platform iOS
 ├── lib/                       # Direktori utama kode sumber Flutter
+│   ├── core/                  # Konfigurasi inti aplikasi
+│   │   └── config/
+│   │       └── api_config.dart # Endpoint, base URL, timeout, dan variabel konfigurasi API
+│   ├── data/                  # Lapisan integrasi data dan komunikasi API
+│   │   ├── models/
+│   │   │   └── weather_model.dart # Parser respons JSON WeatherAPI ke model WeatherMe
+│   │   └── services/
+│   │       └── weather_service.dart # HTTP client, auth, timeout, & error handling
 │   ├── models/                # Definisi struktur data model dan kumpulan data simulasi
 │   │   └── weather_models.dart      # Model CurrentWeather, Forecast, CityWeather, mock data
 │   ├── screens/               # Halaman utama aplikasi
@@ -145,6 +153,7 @@ WeatherMe/
 │   │   ├── city_search_bar.dart          # Komponen bilah input pencarian kota
 │   │   ├── current_location_card.dart    # Kartu lokasi cuaca aktif halaman lokasi
 │   │   ├── current_weather_card.dart     # Kartu pahlawan (hero card) cuaca saat ini
+│   │   ├── current_weather_metrics_card.dart # Kartu indikator cuaca terpisah (Hujan, UV, dsb.)
 │   │   ├── daily_forecast_tile.dart      # Baris prakiraan cuaca 3 harian
 │   │   ├── glass_surface.dart            # Wrapper komponen efek Glassmorphism
 │   │   ├── hourly_forecast.dart          # Kartu geser prakiraan cuaca per jam
@@ -159,8 +168,11 @@ WeatherMe/
 │   │   └── weekly_forecast_list.dart     # Komponen daftar prakiraan 7 hari ke depan
 │   └── main.dart              # Titik masuk utama (entry point) aplikasi
 ├── test/                      # Berkas pengujian otomatis
+│   ├── weather_api_test.dart  # Unit test pengujian parsing JSON dan konfigurasi API
 │   └── widget_test.dart       # Uji asap (smoke test) dan validasi interaksi komponen UI
 ├── web/                       # Konfigurasi proyek native untuk platform Web
+├── .env                       # Berkas kredensial API Key lokal (diabaikan oleh Git)
+├── .env.example               # Template variabel lingkungan untuk API Key
 ├── pubspec.yaml               # Deklarasi dependensi, aset font/logo, dan metadata paket
 └── README.md                  # Dokumentasi proyek
 ```
@@ -221,14 +233,36 @@ Pilih salah satu target perangkat yang terhubung:
 
 ## Konfigurasi API Cuaca
 
-Saat ini, aplikasi WeatherMe **belum terhubung secara langsung ke layanan API cuaca eksternal**. Seluruh informasi cuaca, temperatur, kondisi langit, dan daftar kota masih menggunakan dataset simulasi terstruktur (*mock data*) yang berada di [`lib/models/weather_models.dart`](lib/models/weather_models.dart).
+WeatherMe telah dilengkapi arsitektur integrasi API resmi menggunakan penyedia layanan **[WeatherAPI.com](https://www.weatherapi.com/)**. Layanan ini dipilih karena menyediakan data cuaca real-time yang lengkap (suhu, kelembapan, angin, UV index, prakiraan per jam & harian), registrasi gratis tanpa membutuhkan kartu kredit, serta kuota penggunaan hingga 1.000.000 panggilan per bulan.
 
-### Rencana Integrasi API Mendatang:
-Pada tahap rilis berikutnya, aplikasi ini direncanakan akan mengintegrasikan REST API cuaca publik (seperti *OpenWeatherMap*, *WeatherAPI*, atau *BMKG Data API*).
+### 1. Cara Mendapatkan API Key Gratis
+1. Buka laman pendaftaran resmi WeatherAPI di [https://www.weatherapi.com/signup.aspx](https://www.weatherapi.com/signup.aspx).
+2. Daftarkan akun gratis menggunakan email Anda.
+3. Setelah masuk, buka halaman **Dashboard** akun Anda.
+4. Salin string **API Key** yang tertera pada dashboard.
 
-Ketika integrasi API telah diterapkan, konfigurasi kredensial akan dikelola menggunakan berkas variabel lingkungan (`.env`) atau argumen `--dart-define` saat kompilasi, dengan ketentuan:
-- Kunci API (*API Key*) tidak akan ditulis langsung (*hardcoded*) di dalam berkas kode sumber publik.
-- Berkas penyimpan kredensial lokal dimasukkan ke dalam berkas `.gitignore` demi menjaga keamanan data rahasia.
+### 2. Memasukkan API Key ke Berkas `.env`
+Buka berkas `.env` yang berada di direktori root proyek (sejajar dengan `pubspec.yaml`), lalu tempelkan API Key Anda:
+
+```env
+# WeatherMe - API Configuration Environment
+WEATHER_API_KEY=masukkan_api_key_anda_di_sini
+```
+
+> [!TIP]
+> Berkas `.env` telah secara otomatis didaftarkan pada `.gitignore` dan tidak akan pernah terunggah ke repositori publik GitHub, menjaga kerahasiaan kredensial akun Anda. Jika berkas `.env` belum tersedia, Anda dapat menyalin dari `.env.example`.
+
+### 3. Arsitektur dan Alur Komunikasi Data
+Modul API pada WeatherMe dibangun dengan pemisahan tanggung jawab yang bersih:
+- **`lib/core/config/api_config.dart`**: Menyimpan base URL (`https://api.weatherapi.com/v1`), rute endpoint (`/forecast.json`, `/current.json`, `/search.json`), timeout request (12 detik), dan helper validasi API key.
+- **`lib/data/services/weather_service.dart`**: Service HTTP yang menangani request jaringan, autentikasi, status code handling (400, 401, 403, 429, 500), timeout exception, serta caching respons terakhir untuk efisiensi kuota.
+- **`lib/data/models/weather_model.dart`**: Parser respons JSON yang tangguh (*defensive parsing*) dan mengonversi payload API ke objek domain UI WeatherMe (`CurrentWeather`, `HourlyForecast`, `DailyForecast`, `CalendarDayForecast`).
+
+### 4. Mode Demo Otomatis (Fallback)
+Aplikasi dirancang agar **tidak pernah crash** meskipun API Key belum diisi atau perangkat sedang tidak terhubung ke jaringan:
+- **Jika API Key belum diisi**: Aplikasi secara otomatis aktif dalam **Mode Demo (Mock Data)**. Banner status pada Beranda akan menampilkan badge *"Mode Demo (Mock Data)"* dan seluruh antarmuka tetap berjalan normal menggunakan dataset simulasi.
+- **Jika API Key valid terdeteksi**: Aplikasi beralih menampilkan badge *"Live API (WeatherAPI)"* dengan data cuaca riil dari kota acuan (default: Malang, Indonesia) yang dapat diperbarui kapan saja menggunakan fitur **Pull-to-Refresh**.
+- **Jika terjadi gangguan jaringan**: Aplikasi menampilkan pesan kesalahan yang ramah pengguna beserta tombol **"Coba Lagi"** (*Retry*) tanpa merusak tata letak antarmuka.
 
 ---
 

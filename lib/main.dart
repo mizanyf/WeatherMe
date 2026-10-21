@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi environment variables dari .env
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (_) {
+    // Berjalan dengan mode fallback jika file .env belum terisi
+  }
+
   runApp(const WeatherMeApp());
 }
 
