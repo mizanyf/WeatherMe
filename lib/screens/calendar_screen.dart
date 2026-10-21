@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'locations_screen.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_background.dart';
 import '../widgets/calendar_header.dart';
 import '../widgets/selected_day_forecast_card.dart';
 import '../widgets/top_header.dart';
@@ -147,79 +148,81 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Scrollable Content
-            Positioned.fill(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 110.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 1. Top Header
-                    TopHeader(onSettingsTap: _onSettingsTap),
+      body: AppBackground(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Scrollable Content
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 110.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // 1. Top Header
+                      TopHeader(onSettingsTap: _onSettingsTap),
 
-                    // 2. Calendar Header (Title, Subtitle, Location Selector)
-                    CalendarHeader(
-                      location: 'Malang, Indonesia',
-                      onLocationTap: _onLocationTap,
-                    ),
+                      // 2. Calendar Header (Title, Subtitle, Location Selector)
+                      CalendarHeader(
+                        location: 'Malang, Indonesia',
+                        onLocationTap: _onLocationTap,
+                      ),
 
-                    const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                    // 3. Monthly Calendar Card
-                    WeatherCalendar(
-                      initialDate: _selectedDate,
-                      onDateSelected: _onDateSelected,
-                    ),
+                      // 3. Monthly Calendar Card
+                      WeatherCalendar(
+                        initialDate: _selectedDate,
+                        onDateSelected: _onDateSelected,
+                      ),
 
-                    const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                    // 4. Selected-Day Forecast Card (Fokus Prakiraan)
-                    SelectedDayForecastCard(forecast: _selectedForecast),
+                      // 4. Selected-Day Forecast Card (Fokus Prakiraan)
+                      SelectedDayForecastCard(forecast: _selectedForecast),
 
-                    const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                    // 5. Seven-Day Forecast List (Prakiraan 7 Hari Mendatang)
-                    WeeklyForecastSection(
-                      weeklyList: _weeklyForecasts,
-                      onDetailTap: _onDetailActionTap,
-                    ),
+                      // 5. Seven-Day Forecast List (Prakiraan 7 Hari Mendatang)
+                      WeeklyForecastSection(
+                        weeklyList: _weeklyForecasts,
+                        onDetailTap: _onDetailActionTap,
+                      ),
 
-                    const SizedBox(height: 14),
-                  ],
-                ),
-              ),
-            ),
-
-            // Floating Bottom Navigation Bar (Calendar is active = index 1)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.only(top: 14.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.background.withValues(alpha: 0.0),
-                      AppColors.background.withValues(alpha: 0.35),
-                      AppColors.background.withValues(alpha: 0.70),
+                      const SizedBox(height: 14),
                     ],
-                    stops: const [0.0, 0.45, 1.0],
                   ),
                 ),
-                child: WeatherBottomNavigation(
-                  currentIndex: 1,
-                  onTap: _onNavTapped,
+              ),
+
+              // Floating Bottom Navigation Bar (Calendar is active = index 1)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.only(top: 14.0),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.background.withValues(alpha: 0.0),
+                        AppColors.background.withValues(alpha: 0.35),
+                        AppColors.background.withValues(alpha: 0.70),
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
+                    ),
+                  ),
+                  child: WeatherBottomNavigation(
+                    currentIndex: 1,
+                    onTap: _onNavTapped,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

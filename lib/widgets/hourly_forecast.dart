@@ -186,14 +186,14 @@ class _HourlyForecastCard extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             color: isHighlighted
-                ? Colors.white.withValues(alpha: 0.9)
-                : AppColors.tertiary.withValues(alpha: 0.4),
+                ? const Color(0xFF48CBE8).withValues(alpha: 0.35)
+                : const Color(0xFFBAE6FD).withValues(alpha: 0.50),
             shape: BoxShape.circle,
           ),
-          child: Stack(
+          child: const Stack(
             alignment: Alignment.center,
             children: [
-              const Positioned(
+              Positioned(
                 top: 5,
                 right: 5,
                 child: Icon(
@@ -208,9 +208,7 @@ class _HourlyForecastCard extends StatelessWidget {
                 child: Icon(
                   Icons.cloud_rounded,
                   size: 17,
-                  color: isHighlighted
-                      ? AppColors.neutral
-                      : AppColors.secondary,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -221,14 +219,14 @@ class _HourlyForecastCard extends StatelessWidget {
         return Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
-            color: AppColors.tertiary.withValues(alpha: 0.4),
+          decoration: const BoxDecoration(
+            color: Color(0xFFE2E8F0),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.cloud_rounded,
             size: 20,
-            color: AppColors.secondary,
+            color: Color(0xFF64748B),
           ),
         );
 

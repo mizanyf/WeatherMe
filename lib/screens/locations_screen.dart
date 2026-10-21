@@ -4,6 +4,7 @@ import 'calendar_screen.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/add_city_bottom_sheet.dart';
+import '../widgets/app_background.dart';
 import '../widgets/city_search_bar.dart';
 import '../widgets/current_location_card.dart';
 import '../widgets/locations_header.dart';
@@ -151,17 +152,18 @@ class _LocationsScreenState extends State<LocationsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Scrollable Content
-            Positioned.fill(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 110.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+      body: AppBackground(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Scrollable Content
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 110.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                     // 1. Top Header
                     TopHeader(onSettingsTap: _onSettingsTap),
 
@@ -357,6 +359,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

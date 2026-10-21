@@ -150,7 +150,7 @@ class SavedCityCard extends StatelessWidget {
                 child: Icon(
                   Icons.cloud_rounded,
                   size: 18,
-                  color: AppColors.secondary,
+                  color: Colors.white,
                 ),
               ),
             ],

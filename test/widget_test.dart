@@ -16,6 +16,13 @@ void main() {
     // Verify temperature display
     expect(find.text('28'), findsOneWidget);
 
+    // Verify current weather metrics card (Hujan, Kelembapan, Kec. Angin, Indeks UV)
+    expect(find.text('Hujan'), findsOneWidget);
+    expect(find.text('Kelembapan'), findsOneWidget);
+    expect(find.text('Kec. Angin'), findsOneWidget);
+    expect(find.text('Indeks UV'), findsOneWidget);
+    expect(find.text('Sedang 5'), findsOneWidget);
+
     // Verify hourly forecast title
     expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
 
@@ -51,6 +58,8 @@ void main() {
     expect(find.text('FOKUS PRAKIRAAN'), findsOneWidget);
     expect(find.text('Rabu, 21 Oktober'), findsOneWidget);
     expect(find.text('27°'), findsNWidgets(2));
+    expect(find.text('Plg Hujan'), findsNothing);
+    expect(find.text('Hujan'), findsOneWidget);
 
     // Verify 7-day forecast section
     expect(find.text('Prakiraan 7 Hari Mendatang'), findsOneWidget);

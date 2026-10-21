@@ -22,6 +22,32 @@ class WeatherBottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(22.0, 0, 22.0, 16.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32.0),
+        border: Border.all(color: AppColors.glassBorder, width: 1.2),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFE0F7FC).withValues(alpha: 0.88), // Soft Ice Sky #48CBE8 tint
+            const Color(0xFFF0FDFE).withValues(alpha: 0.92), // Frosted Pure White-Blue
+            const Color(0xFFBAE6FD).withValues(alpha: 0.82), // Ambient Blue Accent
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.18),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(32.0),
         child: BackdropFilter(
@@ -29,55 +55,56 @@ class WeatherBottomNavigation extends StatelessWidget {
             sigmaX: AppColors.glassBlurSigma,
             sigmaY: AppColors.glassBlurSigma,
           ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: AppColors.glassNavFill,
-              borderRadius: BorderRadius.circular(32.0),
-              border: Border.all(color: AppColors.glassBorder, width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow,
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+          child: Stack(
+            children: [
+              // Subtle ambient depth highlight
+              Positioned(
+                right: -20,
+                top: -15,
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.35),
+                  ),
                 ),
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // 1. Home / Beranda
-                _buildNavItem(
-                  index: 0,
-                  customIcon: _buildBerandaIcon(currentIndex == 0),
-                  label: 'Beranda',
-                  isActive: currentIndex == 0,
-                ),
+              ),
 
-                // 2. Calendar / Kalender
-                _buildNavItem(
-                  index: 1,
-                  icon: Icons.calendar_month_rounded,
-                  label: 'Kalender',
-                  isActive: currentIndex == 1,
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // 1. Home / Beranda
+                    _buildNavItem(
+                      index: 0,
+                      customIcon: _buildBerandaIcon(currentIndex == 0),
+                      label: 'Beranda',
+                      isActive: currentIndex == 0,
+                    ),
 
-                // 3. Locations / Lokasi
-                _buildNavItem(
-                  index: 2,
-                  icon: currentIndex == 2
-                      ? Icons.location_on_rounded
-                      : Icons.location_on_outlined,
-                  label: 'Lokasi',
-                  isActive: currentIndex == 2,
+                    // 2. Calendar / Kalender
+                    _buildNavItem(
+                      index: 1,
+                      icon: Icons.calendar_month_rounded,
+                      label: 'Kalender',
+                      isActive: currentIndex == 1,
+                    ),
+
+                    // 3. Locations / Lokasi
+                    _buildNavItem(
+                      index: 2,
+                      icon: currentIndex == 2
+                          ? Icons.location_on_rounded
+                          : Icons.location_on_outlined,
+                      label: 'Lokasi',
+                      isActive: currentIndex == 2,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

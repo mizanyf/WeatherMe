@@ -258,7 +258,7 @@ class DailyForecastTile extends StatelessWidget {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: AppColors.tertiary.withValues(alpha: 0.4),
+            color: const Color(0xFFBAE6FD).withValues(alpha: 0.50),
             shape: BoxShape.circle,
           ),
           child: const Stack(
@@ -279,7 +279,7 @@ class DailyForecastTile extends StatelessWidget {
                 child: Icon(
                   Icons.cloud_rounded,
                   size: 17,
-                  color: AppColors.secondary,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -290,14 +290,14 @@ class DailyForecastTile extends StatelessWidget {
         return Container(
           width: 34,
           height: 34,
-          decoration: BoxDecoration(
-            color: AppColors.tertiary.withValues(alpha: 0.4),
+          decoration: const BoxDecoration(
+            color: Color(0xFFE2E8F0),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.cloud_rounded,
             size: 20,
-            color: AppColors.secondary,
+            color: Color(0xFF64748B),
           ),
         );
 

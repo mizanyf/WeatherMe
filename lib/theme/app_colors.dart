@@ -43,8 +43,8 @@ abstract class AppColors {
   static Color glassAccentFill = const Color(0xFFE0F2FE)
       .withValues(alpha: 0.75);
 
-  /// Ultra-smooth glass fill for floating bottom navbar
-  static Color glassNavFill = Colors.white.withValues(alpha: 0.82);
+  /// Ultra-smooth glass fill for floating bottom navbar with soft blue tint
+  static Color glassNavFill = const Color(0xFFE0F7FC).withValues(alpha: 0.88);
 
   /// Crisp glass border – gives luminous frosted bevel highlight
   static Color glassBorder = Colors.white.withValues(alpha: 0.85);

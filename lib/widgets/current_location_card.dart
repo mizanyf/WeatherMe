@@ -246,11 +246,11 @@ class CurrentLocationCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFCEF6F9),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.secondary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.15),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -259,7 +259,7 @@ class CurrentLocationCard extends StatelessWidget {
               child: const Icon(
                 Icons.cloud_rounded,
                 size: 22,
-                color: Color(0xFF90E8F2),
+                color: Colors.white,
               ),
             ),
           ),

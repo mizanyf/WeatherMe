@@ -167,7 +167,10 @@ class SelectedDayForecastCard extends StatelessWidget {
                         ),
 
                         // Weather Illustration
-                        const WeatherIllustration(size: 96),
+                        WeatherIllustration(
+                          size: 96,
+                          conditionType: forecast.conditionType,
+                        ),
                       ],
                     ),
 
@@ -180,7 +183,7 @@ class SelectedDayForecastCard extends StatelessWidget {
                         Expanded(
                           child: _buildDetailTile(
                             icon: Icons.water_drop_outlined,
-                            label: 'Plg Hujan',
+                            label: 'Hujan',
                             value: forecast.rainChance,
                           ),
                         ),
@@ -229,8 +232,11 @@ class SelectedDayForecastCard extends StatelessWidget {
   Widget _buildDetailTile({
     required IconData icon,
     required String label,
-    required String value,
+    required String? value,
   }) {
+    final String displayValue =
+        (value != null && value.isNotEmpty) ? value : '-';
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
       decoration: BoxDecoration(
@@ -259,7 +265,7 @@ class SelectedDayForecastCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              value,
+              displayValue,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 12,

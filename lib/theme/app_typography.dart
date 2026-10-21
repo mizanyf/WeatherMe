@@ -48,10 +48,10 @@ class AppTypography {
   /// Brand wordmark ("WeatherMe")
   static const TextStyle brandWordmark = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 20,
-    fontWeight: FontWeight.w800,
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
     color: AppColors.neutral,
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
   );
 
   // --- Section & Card Headings ---

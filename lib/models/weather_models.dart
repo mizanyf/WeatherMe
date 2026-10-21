@@ -10,6 +10,8 @@ class CurrentWeather {
   final int feelsLike;
   final int humidity;
   final int windSpeed;
+  final String? rainChance;
+  final String? uvIndex;
 
   const CurrentWeather({
     required this.location,
@@ -21,7 +23,14 @@ class CurrentWeather {
     required this.feelsLike,
     required this.humidity,
     required this.windSpeed,
+    this.rainChance = '5%',
+    this.uvIndex = 'Sedang 5',
   });
+
+  String get safeRainChance =>
+      (rainChance != null && rainChance!.isNotEmpty) ? rainChance! : '5%';
+  String get safeUvIndex =>
+      (uvIndex != null && uvIndex!.isNotEmpty) ? uvIndex! : 'Sedang 5';
 
   static const CurrentWeather mock = CurrentWeather(
     location: 'Malang, Indonesia',
@@ -33,6 +42,8 @@ class CurrentWeather {
     feelsLike: 30,
     humidity: 72,
     windSpeed: 12,
+    rainChance: '5%',
+    uvIndex: 'Sedang 5',
   );
 }
 

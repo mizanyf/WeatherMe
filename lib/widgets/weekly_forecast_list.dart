@@ -252,15 +252,19 @@ class WeeklyForecastTile extends StatelessWidget {
         );
 
       case WeatherConditionType.partlyCloudy:
-        return const SizedBox(
-          width: 20,
-          height: 20,
-          child: Stack(
+        return Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: const Color(0xFFBAE6FD).withValues(alpha: 0.50),
+            shape: BoxShape.circle,
+          ),
+          child: const Stack(
             alignment: Alignment.center,
             children: [
               Positioned(
-                top: 0,
-                right: 0,
+                top: 4,
+                right: 4,
                 child: Icon(
                   Icons.wb_sunny_rounded,
                   size: 11,
@@ -268,12 +272,12 @@ class WeeklyForecastTile extends StatelessWidget {
                 ),
               ),
               Positioned(
-                bottom: 0,
-                left: 0,
+                bottom: 4,
+                left: 4,
                 child: Icon(
                   Icons.cloud_rounded,
-                  size: 15,
-                  color: AppColors.secondary,
+                  size: 14,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -281,10 +285,18 @@ class WeeklyForecastTile extends StatelessWidget {
         );
 
       case WeatherConditionType.cloudy:
-        return const Icon(
-          Icons.cloud_rounded,
-          size: 20,
-          color: AppColors.secondary,
+        return Container(
+          width: 28,
+          height: 28,
+          decoration: const BoxDecoration(
+            color: Color(0xFFE2E8F0),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.cloud_rounded,
+            size: 16,
+            color: Color(0xFF64748B),
+          ),
         );
 
       case WeatherConditionType.rainy:

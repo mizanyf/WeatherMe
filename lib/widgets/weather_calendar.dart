@@ -136,51 +136,93 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28.0),
+        border: Border.all(color: AppColors.glassBorder, width: 1.2),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFE0F7FC), // Soft Ice Sky #48CBE8 tint
+            Color(0xFFF0FDFE), // Frosted Pure White-Blue
+            Color(0xFFBAE6FD), // Ambient Blue Accent
+          ],
+          stops: [0.0, 0.55, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24.0),
+        borderRadius: BorderRadius.circular(28.0),
         child: BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: AppColors.glassBlurSigmaLight,
             sigmaY: AppColors.glassBlurSigmaLight,
           ),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16.0, 18.0, 16.0, 16.0),
-            decoration: BoxDecoration(
-              color: AppColors.glassFill,
-              borderRadius: BorderRadius.circular(24.0),
-              border: Border.all(color: AppColors.glassBorder, width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow,
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
+          child: Stack(
+            children: [
+              // Soft ambient depth circle in the corner
+              Positioned(
+                right: -30,
+                top: -25,
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.25),
+                  ),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Month/Year header and navigation buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+
+              // Calendar content
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 18.0, 16.0, 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Icon + Month Year
+                    // Month/Year header and navigation buttons
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: AppColors.tertiary.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.calendar_today_rounded,
-                            size: 16,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
+                        // Icon + Month Year
+                        Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.75),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  width: 1.0,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(alpha: 0.12),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.calendar_today_rounded,
+                                size: 16,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                         Text(
                           '$monthName $year',
                           style: const TextStyle(
@@ -318,9 +360,11 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
               ],
             ),
           ),
-        ),
+        ],
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildNavButton({
@@ -335,9 +379,20 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
         child: Container(
           width: 32,
           height: 32,
-          decoration: const BoxDecoration(
-            color: AppColors.background,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.70),
             shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.85),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Icon(icon, size: 20, color: AppColors.neutral),
         ),
@@ -369,7 +424,7 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
           color: isSelected
               ? null
               : (isToday
-                    ? AppColors.tertiary.withValues(alpha: 0.25)
+                    ? Colors.white.withValues(alpha: 0.65)
                     : Colors.transparent),
           border: isToday && !isSelected
               ? Border.all(color: AppColors.primary, width: 1.5)
@@ -382,7 +437,15 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
                     offset: const Offset(0, 3),
                   ),
                 ]
-              : null,
+              : (isToday
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -410,8 +473,6 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
     WeatherConditionType condition,
     bool isSelected,
   ) {
-    final iconColor = isSelected ? Colors.white : AppColors.primary;
-
     switch (condition) {
       case WeatherConditionType.sunny:
         return Icon(
@@ -420,11 +481,23 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
           color: isSelected ? Colors.white : AppColors.sunnyYellow,
         );
       case WeatherConditionType.partlyCloudy:
-        return Icon(Icons.wb_cloudy_rounded, size: 11, color: iconColor);
+        return Icon(
+          Icons.wb_cloudy_rounded,
+          size: 11,
+          color: isSelected ? Colors.white : Colors.white,
+        );
       case WeatherConditionType.cloudy:
-        return Icon(Icons.cloud_rounded, size: 11, color: iconColor);
+        return Icon(
+          Icons.cloud_rounded,
+          size: 11,
+          color: isSelected ? Colors.white : const Color(0xFF64748B),
+        );
       case WeatherConditionType.rainy:
-        return Icon(Icons.grain_rounded, size: 11, color: iconColor);
+        return Icon(
+          Icons.grain_rounded,
+          size: 11,
+          color: isSelected ? Colors.white : AppColors.secondary,
+        );
     }
   }
 }
