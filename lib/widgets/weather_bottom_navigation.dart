@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 
 class WeatherBottomNavigation extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
 
-  const WeatherBottomNavigation({
-    super.key,
-    this.currentIndex = 0,
-    this.onTap,
-  });
+  const WeatherBottomNavigation({super.key, this.currentIndex = 0, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +49,12 @@ class WeatherBottomNavigation extends StatelessWidget {
             isActive: currentIndex == 1,
           ),
 
-          // 3. Locations / Lokasi (Inactive placeholder)
+          // 3. Locations / Lokasi
           _buildNavItem(
             index: 2,
-            icon: Icons.location_on_outlined,
+            icon: currentIndex == 2
+                ? Icons.location_on_rounded
+                : Icons.location_on_outlined,
             label: 'Lokasi',
             isActive: currentIndex == 2,
           ),

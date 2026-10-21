@@ -1,0 +1,274 @@
+import 'package:flutter/material.dart';
+
+import '../models/weather_models.dart';
+import '../theme/app_colors.dart';
+
+class WeeklyForecastSection extends StatelessWidget {
+  final List<WeeklyForecastItem> weeklyList;
+  final VoidCallback? onDetailTap;
+
+  const WeeklyForecastSection({
+    super.key,
+    required this.weeklyList,
+    this.onDetailTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                'Prakiraan 7 Hari Mendatang',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.neutral,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              InkWell(
+                onTap: onDetailTap,
+                borderRadius: BorderRadius.circular(8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                  child: Text(
+                    'Detail',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // 7-day Forecast Rows
+          Column(
+            children: weeklyList.map((item) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: WeeklyForecastTile(item: item),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WeeklyForecastTile extends StatelessWidget {
+  final WeeklyForecastItem item;
+
+  const WeeklyForecastTile({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18.0),
+        border: Border.all(color: AppColors.border, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Day & Date (Left)
+          SizedBox(
+            width: 66,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.day,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.neutral,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.date,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.mutedText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Weather Icon + Precipitation
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildWeatherIcon(item.conditionType),
+              const SizedBox(width: 4),
+              SizedBox(
+                width: 34,
+                child: Text(
+                  '${item.precipitation}%',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.mutedText,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(width: 6),
+
+          // Min Temperature
+          SizedBox(
+            width: 28,
+            child: Text(
+              '${item.minTemp}°',
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.mutedText,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Temperature Range Indicator Bar
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final barWidth = constraints.maxWidth;
+                return Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    // Background track
+                    Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: AppColors.tertiary.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    // Active gradient range
+                    Container(
+                      height: 6,
+                      width: barWidth * item.progress.clamp(0.25, 1.0),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            const Color(0xFF75E8F3),
+                            if (item.maxTemp >= 30)
+                              AppColors.sunnyYellow
+                            else
+                              AppColors.secondary,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Max Temperature
+          SizedBox(
+            width: 28,
+            child: Text(
+              '${item.maxTemp}°',
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.neutral,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeatherIcon(WeatherConditionType type) {
+    switch (type) {
+      case WeatherConditionType.sunny:
+        return const Icon(
+          Icons.wb_sunny_rounded,
+          size: 20,
+          color: AppColors.sunnyYellow,
+        );
+
+      case WeatherConditionType.partlyCloudy:
+        return const SizedBox(
+          width: 20,
+          height: 20,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Icon(
+                  Icons.wb_sunny_rounded,
+                  size: 11,
+                  color: AppColors.sunnyYellow,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                child: Icon(
+                  Icons.cloud_rounded,
+                  size: 15,
+                  color: AppColors.secondary,
+                ),
+              ),
+            ],
+          ),
+        );
+
+      case WeatherConditionType.cloudy:
+        return const Icon(
+          Icons.cloud_rounded,
+          size: 20,
+          color: AppColors.secondary,
+        );
+
+      case WeatherConditionType.rainy:
+        return const Icon(
+          Icons.grain_rounded,
+          size: 20,
+          color: AppColors.secondary,
+        );
+    }
+  }
+}

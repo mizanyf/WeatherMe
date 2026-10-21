@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'calendar_screen.dart';
+import 'locations_screen.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/current_weather_card.dart';
@@ -24,42 +27,42 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<DailyForecast> _dailyForecasts = DailyForecast.mockList;
 
   void _onNavTapped(int index) {
+    if (index == 1) {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const CalendarScreen(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
+      return;
+    }
+
+    if (index == 2) {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const LocationsScreen(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _selectedNavIndex = index;
     });
-
-    if (index != 0) {
-      // Visual feedback placeholder for future iterations
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            index == 1
-                ? 'Fitur Kalender akan tersedia di iterasi berikutnya.'
-                : 'Fitur Lokasi akan tersedia di iterasi berikutnya.',
-          ),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: AppColors.neutral,
-        ),
-      );
-    }
   }
 
   void _onCalendarActionTap() {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Navigasi ke Kalender akan tersedia segera.'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        backgroundColor: AppColors.neutral,
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const CalendarScreen(),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
@@ -71,9 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
         content: const Text('Pengaturan cuaca'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         backgroundColor: AppColors.neutral,
       ),
     );

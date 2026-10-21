@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weatherme/main.dart';
 
@@ -25,5 +26,93 @@ void main() {
     expect(find.text('Beranda'), findsOneWidget);
     expect(find.text('Kalender'), findsOneWidget);
     expect(find.text('Lokasi'), findsOneWidget);
+  });
+
+  testWidgets('WeatherMe Calendar screen navigation and interaction test', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const WeatherMeApp());
+
+    // Tap 'Kalender' in bottom navigation
+    await tester.tap(find.text('Kalender'));
+    await tester.pumpAndSettle();
+
+    // Verify Calendar screen title and subtitle
+    expect(find.text('Kalender Cuaca'), findsOneWidget);
+    expect(
+      find.text('Rencanakan harimu dengan prakiraan cuaca'),
+      findsOneWidget,
+    );
+
+    // Verify Monthly calendar header (initial mock is October 2026)
+    expect(find.text('Oktober 2026'), findsOneWidget);
+
+    // Verify Fokus Prakiraan section
+    expect(find.text('FOKUS PRAKIRAAN'), findsOneWidget);
+    expect(find.text('Rabu, 21 Oktober'), findsOneWidget);
+    expect(find.text('27°'), findsNWidgets(2));
+
+    // Verify 7-day forecast section
+    expect(find.text('Prakiraan 7 Hari Mendatang'), findsOneWidget);
+    expect(find.text('Detail'), findsOneWidget);
+
+    // Tap 'Beranda' to navigate back to Home
+    await tester.tap(find.text('Beranda'));
+    await tester.pumpAndSettle();
+
+    // Verify we are back on Home screen
+    expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
+  });
+
+  testWidgets('WeatherMe Locations screen navigation and interaction test', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const WeatherMeApp());
+
+    // Tap 'Lokasi' in bottom navigation
+    await tester.tap(find.text('Lokasi'));
+    await tester.pumpAndSettle();
+
+    // Verify Locations screen title and subtitle
+    expect(find.text('Jelajahi Lokasi'), findsOneWidget);
+    expect(
+      find.text('Temukan cuaca di berbagai belahan dunia'),
+      findsOneWidget,
+    );
+
+    // Verify search field placeholder
+    expect(find.text('Cari kota atau bandara...'), findsOneWidget);
+
+    // Verify Current Location card
+    expect(find.text('LOKASI SAAT INI'), findsOneWidget);
+    expect(find.text('Malang, Indonesia'), findsOneWidget);
+
+    // Verify Saved Cities section
+    expect(find.text('Kota Tersimpan'), findsOneWidget);
+    expect(find.text('Tambah Kota'), findsOneWidget);
+    expect(find.text('Jakarta, Indonesia'), findsOneWidget);
+    expect(find.text('Tokyo, Jepang'), findsOneWidget);
+    expect(find.text('London, Inggris'), findsOneWidget);
+    expect(find.text('Sydney, Australia'), findsOneWidget);
+
+    // Test search filter
+    await tester.enterText(find.byType(TextField), 'Tokyo');
+    await tester.pumpAndSettle();
+
+    // Tokyo should still be visible, London should be filtered out
+    expect(find.text('Tokyo, Jepang'), findsOneWidget);
+    expect(find.text('London, Inggris'), findsNothing);
+
+    // Clear search
+    await tester.tap(find.byTooltip('Hapus'));
+    await tester.pumpAndSettle();
+    expect(find.text('London, Inggris'), findsOneWidget);
+
+    // Tap 'Beranda' to navigate back to Home
+    await tester.tap(find.text('Beranda'));
+    await tester.pumpAndSettle();
+
+    // Verify we are back on Home screen
+    expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
   });
 }
