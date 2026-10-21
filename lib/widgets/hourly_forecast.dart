@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
@@ -29,9 +31,9 @@ class HourlyForecastSection extends StatelessWidget {
                 'Prakiraan Hari Ini',
                 style: TextStyle(
                   fontSize: 17,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.neutral,
-                  letterSpacing: -0.2,
+                  letterSpacing: -0.3,
                 ),
               ),
               InkWell(
@@ -62,7 +64,7 @@ class HourlyForecastSection extends StatelessWidget {
           child: Row(
             children: hourlyList.map((item) {
               return Padding(
-                padding: const EdgeInsets.only(right: 12.0),
+                padding: const EdgeInsets.only(right: 10.0),
                 child: _HourlyForecastCard(item: item),
               );
             }).toList(),
@@ -82,61 +84,75 @@ class _HourlyForecastCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isHighlighted = item.isCurrent;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      width: 78,
-      padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: isHighlighted ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.circular(22.0),
-        border: isHighlighted
-            ? Border.all(color: AppColors.primary, width: 1.5)
-            : Border.all(color: AppColors.border, width: 1.2),
-        boxShadow: [
-          if (isHighlighted)
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.45),
-              blurRadius: 14,
-              offset: const Offset(0, 5),
-            )
-          else
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20.0),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: AppColors.glassBlurSigmaLight,
+          sigmaY: AppColors.glassBlurSigmaLight,
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          width: 76,
+          padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 8.0),
+          decoration: BoxDecoration(
+            gradient: isHighlighted
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFE0F7FC), Color(0xFFBAE6FD)],
+                  )
+                : null,
+            color: isHighlighted ? null : AppColors.glassFill,
+            borderRadius: BorderRadius.circular(20.0),
+            border: Border.all(
+              color: isHighlighted ? Colors.white : AppColors.glassBorder,
+              width: isHighlighted ? 1.2 : 0.8,
             ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Time label
-          Text(
-            item.time,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.w500,
-              color: isHighlighted ? AppColors.neutral : AppColors.mutedText,
-            ),
+            boxShadow: [
+              BoxShadow(
+                color: isHighlighted
+                    ? AppColors.primary.withValues(alpha: 0.25)
+                    : AppColors.shadow,
+                blurRadius: isHighlighted ? 14 : 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Time label
+              Text(
+                item.time,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isHighlighted ? FontWeight.w800 : FontWeight.w600,
+                  color: isHighlighted
+                      ? AppColors.secondary
+                      : AppColors.mutedText,
+                ),
+              ),
+              const SizedBox(height: 12),
 
-          // Weather Icon
-          _buildWeatherIcon(item.conditionType, isHighlighted),
+              // Weather Icon
+              _buildWeatherIcon(item.conditionType, isHighlighted),
 
-          const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-          // Temperature
-          Text(
-            '${item.temperature}°',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: AppColors.neutral,
-            ),
+              // Temperature
+              Text(
+                '${item.temperature}°',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.neutral,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

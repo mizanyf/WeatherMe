@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
@@ -12,215 +14,199 @@ class CurrentLocationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-      padding: const EdgeInsets.fromLTRB(20.0, 18.0, 20.0, 18.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26.0),
+        border: Border.all(color: AppColors.glassBorder, width: 1.2),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFCEF5F9), // Soft cyan tint
-            Color(0xFFE8FBFC), // Light sky
-            Color(0xFFB4F3F9), // Brand Tertiary
+            Color(0xFFE0F7FC), // Soft Ice Sky #48CBE8 tint
+            Color(0xFFF0FDFE), // Frosted Pure White-Blue
+            Color(0xFFBAE6FD), // Ambient Blue Accent
           ],
-          stops: [0.0, 0.45, 1.0],
+          stops: [0.0, 0.55, 1.0],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondary.withValues(alpha: 0.10),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.18),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: AppColors.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          // Background organic circle for depth
-          Positioned(
-            right: -25,
-            top: -20,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.25),
-              ),
-            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: AppColors.glassBlurSigmaLight,
+            sigmaY: AppColors.glassBlurSigmaLight,
           ),
-
-          // Main Content
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Row: LOKASI SAAT INI Badge on Left, Local Time on Right
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Badge: LOKASI SAAT INI
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0,
-                      vertical: 4.5,
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22.0, 18.0, 20.0, 18.0),
+            child: Stack(
+              children: [
+                // Background organic circle for depth
+                Positioned(
+                  right: -30,
+                  top: -25,
+                  child: Container(
+                    width: 130,
+                    height: 130,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.70),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        width: 0.8,
-                      ),
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.22),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  ),
+                ),
+
+                // Main Content
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Row: LOKASI SAAT INI label + Local Time
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: AppColors.secondary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
+                        // Label — clean text, no pill
                         const Text(
                           'LOKASI SAAT INI',
                           style: TextStyle(
                             fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.neutral,
-                            letterSpacing: 0.4,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+
+                        // Local Time
+                        Text(
+                          city.localTime ?? 'Waktu lokal 10:30 WIB',
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.mutedText,
                           ),
                         ),
                       ],
                     ),
-                  ),
 
-                  // Local Time
-                  Text(
-                    city.localTime ?? 'Waktu lokal 10:30 WIB',
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.mutedText,
+                    const SizedBox(height: 16),
+
+                    // Middle: City Name, Condition, and Illustration on Right
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              city.displayName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.neutral,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              city.condition,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.mutedText,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Weather Illustration / Badge
+                        _buildIllustration(),
+                      ],
                     ),
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-              // Middle: City Name, Condition, and Sun/Cloud Illustration on Right
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        city.displayName,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.neutral,
-                          letterSpacing: -0.3,
+                    // Bottom Row: Large Temperature on Left, Min/Max on Right
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Temperature: 28°C
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${city.temperature}',
+                              style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.w700,
+                                height: 1.0,
+                                color: AppColors.neutral,
+                                letterSpacing: -2.0,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 4.0, left: 2.0),
+                              child: Text(
+                                '°C',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        city.condition,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.mutedText,
-                        ),
-                      ),
-                    ],
-                  ),
 
-                  // Weather Illustration / Badge
-                  _buildIllustration(),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Bottom Row: Large Temperature on Left, Min/Max on Right
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // Temperature: 28°C
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${city.temperature}',
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w400,
-                          height: 1.0,
-                          color: AppColors.neutral,
-                          letterSpacing: -2.0,
+                        // Min and Max temperatures
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 14,
+                              color: AppColors.secondary,
+                            ),
+                            Text(
+                              ' ${city.maxTemp}°',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.neutral,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 14,
+                              color: AppColors.mutedText,
+                            ),
+                            Text(
+                              ' ${city.minTemp}°',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.mutedText,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 4.0, left: 2.0),
-                        child: Text(
-                          '°C',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Min and Max temperatures: ↑ 30°  ↓ 21°
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.arrow_upward_rounded,
-                        size: 14,
-                        color: AppColors.secondary,
-                      ),
-                      Text(
-                        ' ${city.maxTemp}°',
-                        style: const TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.neutral,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.arrow_downward_rounded,
-                        size: 14,
-                        color: AppColors.mutedText,
-                      ),
-                      Text(
-                        ' ${city.minTemp}°',
-                        style: const TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.neutral,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,8 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 
+/// Modern Frosted Glass Weather Detail Card.
 class WeatherDetailCard extends StatelessWidget {
   final IconData icon;
   final String value;
@@ -19,92 +23,105 @@ class WeatherDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 16.0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(22.0),
-        border: Border.all(color: AppColors.border, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22.0),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: AppColors.glassBlurSigmaLight,
+          sigmaY: AppColors.glassBlurSigmaLight,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 16.0),
+          decoration: BoxDecoration(
+            color: AppColors.glassFill,
+            borderRadius: BorderRadius.circular(22.0),
+            border: Border.all(color: AppColors.glassBorder, width: 1.0),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Circular icon container with soft Tertiary tint
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppColors.tertiary.withValues(alpha: 0.55),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 20, color: AppColors.secondary),
-          ),
-          const SizedBox(height: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Icon wrapped in subtle ice blue glass circle
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 20, color: AppColors.secondary),
+              ),
+              const SizedBox(height: 10),
 
-          // Value and optional unit
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: unit != null
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
+              // Value and optional unit
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: unit != null
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            value,
+                            style: const TextStyle(
+                              fontFamily: AppTypography.fontFamily,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.neutral,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            unit!,
+                            style: const TextStyle(
+                              fontFamily: AppTypography.fontFamily,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.mutedText,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(
                         value,
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 19,
                           fontWeight: FontWeight.w700,
                           color: AppColors.neutral,
-                          letterSpacing: -0.5,
+                          letterSpacing: -0.3,
                         ),
                       ),
-                      const SizedBox(width: 2),
-                      Text(
-                        unit!,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.neutral,
-                        ),
-                      ),
-                    ],
-                  )
-                : Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.neutral,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 4),
+              ),
+              const SizedBox(height: 4),
 
-          // Label
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: AppColors.mutedText,
-              letterSpacing: 0.4,
-              height: 1.2,
-            ),
+              // Category Label
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: AppTypography.fontFamily,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.mutedText,
+                  letterSpacing: 0.2,
+                  height: 1.25,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -118,35 +135,37 @@ class WeatherDetailsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         children: [
-          // Card 1: Terasa Seperti
+          // 1. Feels Like
           Expanded(
             child: WeatherDetailCard(
               icon: Icons.thermostat_rounded,
-              value: '${weather.feelsLike}°C',
+              value: '${weather.feelsLike}',
+              unit: '°C',
               label: 'TERASA\nSEPERTI',
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
 
-          // Card 2: Kelembapan
+          // 2. Humidity
           Expanded(
             child: WeatherDetailCard(
               icon: Icons.water_drop_rounded,
-              value: '${weather.humidity}%',
+              value: '${weather.humidity}',
+              unit: '%',
               label: 'KELEMBAPAN\n',
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
 
-          // Card 3: Kecepatan Angin
+          // 3. Wind Speed
           Expanded(
             child: WeatherDetailCard(
               icon: Icons.air_rounded,
               value: '${weather.windSpeed}',
-              unit: 'km/jam',
+              unit: 'km/j',
               label: 'KECEPATAN\nANGIN',
             ),
           ),

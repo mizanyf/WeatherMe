@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
+import 'app_typography.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
@@ -28,35 +29,8 @@ class AppTheme {
           statusBarBrightness: Brightness.light,
         ),
       ),
-      fontFamily: 'Roboto',
-      textTheme: const TextTheme(
-        headlineLarge: TextStyle(
-          color: AppColors.neutral,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.5,
-        ),
-        headlineMedium: TextStyle(
-          color: AppColors.neutral,
-          fontWeight: FontWeight.w700,
-        ),
-        titleLarge: TextStyle(
-          color: AppColors.neutral,
-          fontWeight: FontWeight.w700,
-          fontSize: 18,
-        ),
-        titleMedium: TextStyle(
-          color: AppColors.neutral,
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
-        bodyLarge: TextStyle(color: AppColors.neutral, fontSize: 14),
-        bodyMedium: TextStyle(color: AppColors.neutral, fontSize: 13),
-        bodySmall: TextStyle(
-          color: AppColors.mutedText,
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+      fontFamily: AppTypography.fontFamily,
+      textTheme: AppTypography.textTheme,
     );
   }
 }

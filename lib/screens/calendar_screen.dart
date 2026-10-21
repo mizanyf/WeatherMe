@@ -167,7 +167,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       onLocationTap: _onLocationTap,
                     ),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
 
                     // 3. Monthly Calendar Card
                     WeatherCalendar(
@@ -175,12 +175,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       onDateSelected: _onDateSelected,
                     ),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
 
                     // 4. Selected-Day Forecast Card (Fokus Prakiraan)
                     SelectedDayForecastCard(forecast: _selectedForecast),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
 
                     // 5. Seven-Day Forecast List (Prakiraan 7 Hari Mendatang)
                     WeeklyForecastSection(
@@ -188,7 +188,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       onDetailTap: _onDetailActionTap,
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                   ],
                 ),
               ),
@@ -200,15 +200,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.only(top: 12.0),
+                padding: const EdgeInsets.only(top: 14.0),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       AppColors.background.withValues(alpha: 0.0),
-                      AppColors.background.withValues(alpha: 0.8),
-                      AppColors.background,
+                      AppColors.background.withValues(alpha: 0.35),
+                      AppColors.background.withValues(alpha: 0.70),
                     ],
                     stops: const [0.0, 0.45, 1.0],
                   ),

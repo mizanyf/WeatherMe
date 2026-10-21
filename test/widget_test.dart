@@ -13,8 +13,8 @@ void main() {
     // Verify condition badge
     expect(find.text('Cerah Berawan'), findsOneWidget);
 
-    // Verify detail card labels
-    expect(find.text('KELEMBAPAN\n'), findsOneWidget);
+    // Verify temperature display
+    expect(find.text('28'), findsOneWidget);
 
     // Verify hourly forecast title
     expect(find.text('Prakiraan Hari Ini'), findsOneWidget);

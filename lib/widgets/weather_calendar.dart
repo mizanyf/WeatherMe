@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
@@ -134,171 +136,189 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-      padding: const EdgeInsets.fromLTRB(16.0, 18.0, 16.0, 16.0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(24.0),
-        border: Border.all(color: AppColors.border, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: AppColors.glassBlurSigmaLight,
+            sigmaY: AppColors.glassBlurSigmaLight,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Month/Year header and navigation buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Icon + Month Year
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: AppColors.tertiary.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.calendar_today_rounded,
-                      size: 16,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$monthName $year',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.neutral,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Prev / Next buttons
-              Row(
-                children: [
-                  _buildNavButton(
-                    icon: Icons.chevron_left_rounded,
-                    onTap: _goToPreviousMonth,
-                  ),
-                  const SizedBox(width: 4),
-                  _buildNavButton(
-                    icon: Icons.chevron_right_rounded,
-                    onTap: _goToNextMonth,
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Weekday Labels Row
-          Row(
-            children: _weekdays.map((day) {
-              return Expanded(
-                child: Center(
-                  child: Text(
-                    day,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.mutedText,
-                    ),
-                  ),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16.0, 18.0, 16.0, 16.0),
+            decoration: BoxDecoration(
+              color: AppColors.glassFill,
+              borderRadius: BorderRadius.circular(24.0),
+              border: Border.all(color: AppColors.glassBorder, width: 1.0),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
                 ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Date Grid Rows
-          Column(
-            children: List.generate((totalGridCells / 7).ceil(), (rowIndex) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  children: List.generate(7, (colIndex) {
-                    final cellIndex = rowIndex * 7 + colIndex;
-
-                    if (cellIndex < leadingDays) {
-                      // Day from previous month
-                      final prevDayNumber =
-                          previousMonthDays - (leadingDays - cellIndex - 1);
-                      return Expanded(
-                        child: Center(
-                          child: Text(
-                            '$prevDayNumber',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.mutedText.withValues(
-                                alpha: 0.35,
-                              ),
-                            ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Month/Year header and navigation buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Icon + Month Year
+                    Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppColors.tertiary.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.calendar_today_rounded,
+                            size: 16,
+                            color: AppColors.secondary,
                           ),
                         ),
-                      );
-                    } else if (cellIndex < leadingDays + daysInMonth) {
-                      // Day in current month
-                      final dayNumber = cellIndex - leadingDays + 1;
-                      final currentDate = DateTime(year, month, dayNumber);
-                      final isSelected =
-                          _selectedDate.year == currentDate.year &&
-                          _selectedDate.month == currentDate.month &&
-                          _selectedDate.day == currentDate.day;
-
-                      final isToday =
-                          currentDate.year == 2026 &&
-                          currentDate.month == 10 &&
-                          currentDate.day == 21;
-
-                      final condition = _getConditionForDate(currentDate);
-
-                      return Expanded(
-                        child: _buildDateCell(
-                          date: currentDate,
-                          dayNumber: dayNumber,
-                          isSelected: isSelected,
-                          isToday: isToday,
-                          condition: condition,
-                        ),
-                      );
-                    } else {
-                      // Day from next month
-                      final nextDayNumber =
-                          cellIndex - (leadingDays + daysInMonth) + 1;
-                      return Expanded(
-                        child: Center(
-                          child: Text(
-                            '$nextDayNumber',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.mutedText.withValues(
-                                alpha: 0.35,
-                              ),
-                            ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '$monthName $year',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.neutral,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                      );
-                    }
+                      ],
+                    ),
+
+                    // Prev / Next buttons
+                    Row(
+                      children: [
+                        _buildNavButton(
+                          icon: Icons.chevron_left_rounded,
+                          onTap: _goToPreviousMonth,
+                        ),
+                        const SizedBox(width: 4),
+                        _buildNavButton(
+                          icon: Icons.chevron_right_rounded,
+                          onTap: _goToNextMonth,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Weekday Labels Row
+                Row(
+                  children: _weekdays.map((day) {
+                    return Expanded(
+                      child: Center(
+                        child: Text(
+                          day,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.mutedText,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Date Grid Rows
+                Column(
+                  children: List.generate((totalGridCells / 7).ceil(), (
+                    rowIndex,
+                  ) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: List.generate(7, (colIndex) {
+                          final cellIndex = rowIndex * 7 + colIndex;
+
+                          if (cellIndex < leadingDays) {
+                            // Day from previous month
+                            final prevDayNumber =
+                                previousMonthDays -
+                                (leadingDays - cellIndex - 1);
+                            return Expanded(
+                              child: Center(
+                                child: Text(
+                                  '$prevDayNumber',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.mutedText.withValues(
+                                      alpha: 0.35,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else if (cellIndex < leadingDays + daysInMonth) {
+                            // Day in current month
+                            final dayNumber = cellIndex - leadingDays + 1;
+                            final currentDate = DateTime(
+                              year,
+                              month,
+                              dayNumber,
+                            );
+                            final isSelected =
+                                _selectedDate.year == currentDate.year &&
+                                _selectedDate.month == currentDate.month &&
+                                _selectedDate.day == currentDate.day;
+
+                            final isToday =
+                                currentDate.year == 2026 &&
+                                currentDate.month == 10 &&
+                                currentDate.day == 21;
+
+                            final condition = _getConditionForDate(currentDate);
+
+                            return Expanded(
+                              child: _buildDateCell(
+                                date: currentDate,
+                                dayNumber: dayNumber,
+                                isSelected: isSelected,
+                                isToday: isToday,
+                                condition: condition,
+                              ),
+                            );
+                          } else {
+                            // Day from next month
+                            final nextDayNumber =
+                                cellIndex - (leadingDays + daysInMonth) + 1;
+                            return Expanded(
+                              child: Center(
+                                child: Text(
+                                  '$nextDayNumber',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.mutedText.withValues(
+                                      alpha: 0.35,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        }),
+                      ),
+                    );
                   }),
                 ),
-              );
-            }),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -315,10 +335,9 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
         child: Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.background,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border, width: 1.0),
           ),
           child: Icon(icon, size: 20, color: AppColors.neutral),
         ),
@@ -335,20 +354,31 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
   }) {
     return InkWell(
       onTap: () => _selectDate(date),
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 48,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(12),
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF48CBE8), Color(0xFF0284C7)],
+                )
+              : null,
+          color: isSelected
+              ? null
+              : (isToday
+                    ? AppColors.tertiary.withValues(alpha: 0.25)
+                    : Colors.transparent),
           border: isToday && !isSelected
-              ? Border.all(color: AppColors.secondary, width: 1.2)
+              ? Border.all(color: AppColors.primary, width: 1.5)
               : null,
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.45),
-                    blurRadius: 8,
+                    color: AppColors.primary.withValues(alpha: 0.40),
+                    blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
                 ]
@@ -360,9 +390,9 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
             Text(
               '$dayNumber',
               style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected ? AppColors.neutral : AppColors.neutral,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                color: isSelected ? Colors.white : AppColors.neutral,
               ),
             ),
             const SizedBox(height: 2),
@@ -380,21 +410,21 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
     WeatherConditionType condition,
     bool isSelected,
   ) {
-    final color = isSelected ? AppColors.neutral : AppColors.secondary;
+    final iconColor = isSelected ? Colors.white : AppColors.primary;
 
     switch (condition) {
       case WeatherConditionType.sunny:
         return Icon(
           Icons.wb_sunny_rounded,
           size: 11,
-          color: isSelected ? AppColors.neutral : AppColors.sunnyYellow,
+          color: isSelected ? Colors.white : AppColors.sunnyYellow,
         );
       case WeatherConditionType.partlyCloudy:
-        return Icon(Icons.wb_cloudy_rounded, size: 11, color: color);
+        return Icon(Icons.wb_cloudy_rounded, size: 11, color: iconColor);
       case WeatherConditionType.cloudy:
-        return Icon(Icons.cloud_rounded, size: 11, color: color);
+        return Icon(Icons.cloud_rounded, size: 11, color: iconColor);
       case WeatherConditionType.rainy:
-        return Icon(Icons.grain_rounded, size: 11, color: color);
+        return Icon(Icons.grain_rounded, size: 11, color: iconColor);
     }
   }
 }

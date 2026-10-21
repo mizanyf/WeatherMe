@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
@@ -29,9 +31,9 @@ class DailyForecastSection extends StatelessWidget {
                 'Prakiraan 3 Hari',
                 style: TextStyle(
                   fontSize: 17,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.neutral,
-                  letterSpacing: -0.2,
+                  letterSpacing: -0.3,
                 ),
               ),
               InkWell(
@@ -65,14 +67,48 @@ class DailyForecastSection extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Daily Forecast Rows
-          Column(
-            children: dailyList.map((item) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: DailyForecastTile(item: item),
-              );
-            }).toList(),
+          // Daily Forecast Rows — Frosted Glass Container
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24.0),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: AppColors.glassBlurSigmaLight,
+                sigmaY: AppColors.glassBlurSigmaLight,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 6.0,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.glassFill,
+                  borderRadius: BorderRadius.circular(24.0),
+                  border: Border.all(color: AppColors.glassBorder, width: 1.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: List.generate(dailyList.length, (index) {
+                    return Column(
+                      children: [
+                        DailyForecastTile(item: dailyList[index]),
+                        if (index < dailyList.length - 1)
+                          Divider(
+                            height: 1,
+                            thickness: 0.8,
+                            color: AppColors.border.withValues(alpha: 0.7),
+                          ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -87,20 +123,8 @@ class DailyForecastTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18.0),
-        border: Border.all(color: AppColors.border, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         children: [
           // Day & Date (Left)
@@ -146,25 +170,21 @@ class DailyForecastTile extends StatelessWidget {
                   children: [
                     // Background track
                     Container(
-                      height: 6,
+                      height: 5,
                       decoration: BoxDecoration(
-                        color: AppColors.tertiary.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(3),
+                        color: AppColors.border.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(2.5),
                       ),
                     ),
                     // Active gradient range
                     Container(
-                      height: 6,
+                      height: 5,
                       width: barWidth * item.progress.clamp(0.2, 1.0),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [
-                            AppColors.primary,
-                            Color(0xFF8CEFF9),
-                            AppColors.sunnyYellow,
-                          ],
+                          colors: [Color(0xFF48CBE8), Color(0xFF0284C7)],
                         ),
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(2.5),
                       ),
                     ),
                   ],
@@ -182,8 +202,8 @@ class DailyForecastTile extends StatelessWidget {
               Text(
                 '${item.maxTemp}°',
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.neutral,
                 ),
               ),

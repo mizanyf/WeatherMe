@@ -9,7 +9,6 @@ import '../widgets/daily_forecast_tile.dart';
 import '../widgets/hourly_forecast.dart';
 import '../widgets/top_header.dart';
 import '../widgets/weather_bottom_navigation.dart';
-import '../widgets/weather_detail_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -101,20 +100,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     // 2. Current Weather Hero Card
                     CurrentWeatherCard(weather: _currentWeather),
 
-                    const SizedBox(height: 6),
-
-                    // 3. Weather Details Row (Feels like, Humidity, Wind speed)
-                    WeatherDetailsRow(weather: _currentWeather),
-
                     const SizedBox(height: 10),
 
-                    // 4. Hourly Forecast Section
+                    // 3. Hourly Forecast Section
                     HourlyForecastSection(
                       hourlyList: _hourlyForecasts,
                       onMoreTap: _onCalendarActionTap,
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
 
                     // 5. Three-Day Forecast Section
                     DailyForecastSection(
@@ -126,21 +120,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Floating Bottom Navigation Bar with Soft Gradient Mask
+            // Floating Bottom Navigation Bar with Soft Glass-Friendly Gradient Mask
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.only(top: 12.0),
+                padding: const EdgeInsets.only(top: 14.0),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       AppColors.background.withValues(alpha: 0.0),
-                      AppColors.background.withValues(alpha: 0.8),
-                      AppColors.background,
+                      AppColors.background.withValues(alpha: 0.35),
+                      AppColors.background.withValues(alpha: 0.70),
                     ],
                     stops: const [0.0, 0.45, 1.0],
                   ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
@@ -54,14 +56,48 @@ class WeeklyForecastSection extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // 7-day Forecast Rows
-          Column(
-            children: weeklyList.map((item) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: WeeklyForecastTile(item: item),
-              );
-            }).toList(),
+          // 7-day Forecast Rows — Frosted Glass Container
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24.0),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: AppColors.glassBlurSigmaLight,
+                sigmaY: AppColors.glassBlurSigmaLight,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 4.0,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.glassFill,
+                  borderRadius: BorderRadius.circular(24.0),
+                  border: Border.all(color: AppColors.glassBorder, width: 1.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: List.generate(weeklyList.length, (index) {
+                    return Column(
+                      children: [
+                        WeeklyForecastTile(item: weeklyList[index]),
+                        if (index < weeklyList.length - 1)
+                          Divider(
+                            height: 1,
+                            thickness: 0.8,
+                            color: AppColors.border.withValues(alpha: 0.7),
+                          ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -76,20 +112,8 @@ class WeeklyForecastTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18.0),
-        border: Border.all(color: AppColors.border, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 11.0),
       child: Row(
         children: [
           // Day & Date (Left)
@@ -168,15 +192,15 @@ class WeeklyForecastTile extends StatelessWidget {
                   children: [
                     // Background track
                     Container(
-                      height: 6,
+                      height: 5,
                       decoration: BoxDecoration(
-                        color: AppColors.tertiary.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(3),
+                        color: AppColors.tertiary.withValues(alpha: 0.30),
+                        borderRadius: BorderRadius.circular(2.5),
                       ),
                     ),
                     // Active gradient range
                     Container(
-                      height: 6,
+                      height: 5,
                       width: barWidth * item.progress.clamp(0.25, 1.0),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -189,7 +213,7 @@ class WeeklyForecastTile extends StatelessWidget {
                               AppColors.secondary,
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(2.5),
                       ),
                     ),
                   ],
@@ -207,7 +231,7 @@ class WeeklyForecastTile extends StatelessWidget {
               '${item.maxTemp}°',
               textAlign: TextAlign.right,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.neutral,
               ),

@@ -16,10 +16,10 @@ class LocationsHeader extends StatelessWidget {
           Text(
             'Jelajahi Lokasi',
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
               color: AppColors.neutral,
-              letterSpacing: -0.4,
+              letterSpacing: -0.5,
             ),
           ),
           SizedBox(height: 4),

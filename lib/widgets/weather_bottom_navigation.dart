@@ -1,7 +1,17 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 
+/// Modernized Glassmorphism Bottom Navigation Bar for WeatherMe.
+///
+/// Features:
+/// - Floating frosted glass pill capsule with high-sigma Gaussian blur.
+/// - Crisp luminous glass highlight border (`Colors.white.withValues(alpha: 0.85)`).
+/// - Dynamic active capsule with smooth sky-blue gradient and soft ambient glow.
+/// - Refined [Outfit] typography with crisp contrast.
 class WeatherBottomNavigation extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
@@ -11,81 +21,92 @@ class WeatherBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 16.0),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(36.0),
-        border: Border.all(color: AppColors.border, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.secondary.withValues(alpha: 0.10),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+      margin: const EdgeInsets.fromLTRB(22.0, 0, 22.0, 16.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: AppColors.glassBlurSigma,
+            sigmaY: AppColors.glassBlurSigma,
           ),
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // 1. Home / Beranda (Active)
-          _buildNavItem(
-            index: 0,
-            customIcon: _buildBerandaIcon(currentIndex == 0),
-            label: 'Beranda',
-            isActive: currentIndex == 0,
-          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+            decoration: BoxDecoration(
+              color: AppColors.glassNavFill,
+              borderRadius: BorderRadius.circular(32.0),
+              border: Border.all(color: AppColors.glassBorder, width: 1.0),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // 1. Home / Beranda
+                _buildNavItem(
+                  index: 0,
+                  customIcon: _buildBerandaIcon(currentIndex == 0),
+                  label: 'Beranda',
+                  isActive: currentIndex == 0,
+                ),
 
-          // 2. Calendar / Kalender (Inactive placeholder)
-          _buildNavItem(
-            index: 1,
-            icon: Icons.calendar_month_outlined,
-            label: 'Kalender',
-            isActive: currentIndex == 1,
-          ),
+                // 2. Calendar / Kalender
+                _buildNavItem(
+                  index: 1,
+                  icon: Icons.calendar_month_rounded,
+                  label: 'Kalender',
+                  isActive: currentIndex == 1,
+                ),
 
-          // 3. Locations / Lokasi
-          _buildNavItem(
-            index: 2,
-            icon: currentIndex == 2
-                ? Icons.location_on_rounded
-                : Icons.location_on_outlined,
-            label: 'Lokasi',
-            isActive: currentIndex == 2,
+                // 3. Locations / Lokasi
+                _buildNavItem(
+                  index: 2,
+                  icon: currentIndex == 2
+                      ? Icons.location_on_rounded
+                      : Icons.location_on_outlined,
+                  label: 'Lokasi',
+                  isActive: currentIndex == 2,
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildBerandaIcon(bool isActive) {
     return SizedBox(
-      width: 24,
-      height: 22,
+      width: 22,
+      height: 20,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(
             top: 0,
-            right: 1,
+            right: 0,
             child: Icon(
               Icons.wb_sunny_rounded,
-              size: 13,
-              color: isActive ? AppColors.neutral : AppColors.mutedText,
+              size: 11,
+              color: isActive ? Colors.white : AppColors.mutedText,
             ),
           ),
           Positioned(
             bottom: 0,
-            left: 1,
+            left: 0,
             child: Icon(
               Icons.cloud_rounded,
-              size: 16,
-              color: isActive ? AppColors.neutral : AppColors.mutedText,
+              size: 15,
+              color: isActive ? Colors.white : AppColors.mutedText,
             ),
           ),
         ],
@@ -108,20 +129,30 @@ class WeatherBottomNavigation extends StatelessWidget {
             onTap!(index);
           }
         },
-        borderRadius: BorderRadius.circular(24.0),
+        borderRadius: BorderRadius.circular(22.0),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 220),
           curve: Curves.easeInOut,
           padding: isActive
-              ? const EdgeInsets.symmetric(horizontal: 22.0, vertical: 8.0)
-              : const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              ? const EdgeInsets.symmetric(horizontal: 20.0, vertical: 7.0)
+              : const EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(24.0),
+            gradient: isActive
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF48CBE8), // WeatherMe Vibrant sky #48CBE8
+                      Color(0xFF0284C7), // Deep azure
+                    ],
+                  )
+                : null,
+            color: isActive ? null : Colors.transparent,
+            borderRadius: BorderRadius.circular(22.0),
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.4),
+                      color: AppColors.primary.withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -134,16 +165,18 @@ class WeatherBottomNavigation extends StatelessWidget {
               customIcon ??
                   Icon(
                     icon,
-                    size: 22,
-                    color: isActive ? AppColors.neutral : AppColors.mutedText,
+                    size: 20,
+                    color: isActive ? Colors.white : AppColors.mutedText,
                   ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2),
               Text(
                 label,
                 style: TextStyle(
+                  fontFamily: AppTypography.fontFamily,
                   fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.neutral : AppColors.mutedText,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                  color: isActive ? Colors.white : AppColors.mutedText,
+                  letterSpacing: 0.1,
                 ),
               ),
             ],

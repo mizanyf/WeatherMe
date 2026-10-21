@@ -26,15 +26,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
   CityWeather _currentLocation = CityWeather.currentLocation;
   late List<CityWeather> _savedCities;
 
-  // Quick filter chips matching bottom of screenshot
-  final List<String> _quickChips = [
-    'Paris',
-    'Tokyo',
-    'Bali',
-    'New York',
-    'Seoul',
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -58,38 +49,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
       _searchController.clear();
       _searchQuery = '';
     });
-  }
-
-  void _toggleFavorite(int index) {
-    setState(() {
-      final city = _displayedCities[index];
-      final actualIndex = _savedCities.indexWhere((c) => c.id == city.id);
-      if (actualIndex != -1) {
-        _savedCities[actualIndex] = _savedCities[actualIndex].copyWith(
-          isFavorite: !_savedCities[actualIndex].isFavorite,
-        );
-      }
-    });
-
-    final city = _savedCities.firstWhere(
-      (c) => c.id == _displayedCities[index].id,
-      orElse: () => _displayedCities[index],
-    );
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          city.isFavorite
-              ? '${city.cityName} ditambahkan ke favorit.'
-              : '${city.cityName} dihapus dari favorit.',
-        ),
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: AppColors.neutral,
-      ),
-    );
   }
 
   void _openAddCitySheet() {
@@ -209,7 +168,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                     // 2. Locations Header
                     const LocationsHeader(),
 
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
 
                     // 3. City Search Bar
                     CitySearchBar(
@@ -218,11 +177,13 @@ class _LocationsScreenState extends State<LocationsScreen> {
                       onClear: _onSearchClear,
                     ),
 
+                    const SizedBox(height: 4),
+
                     // 4. Current Location Card
                     if (_searchQuery.isEmpty)
                       CurrentLocationCard(city: _currentLocation),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
 
                     // 5. Saved Cities Section Header
                     Padding(
@@ -258,14 +219,21 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                   vertical: 6.0,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary,
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFF48CBE8),
+                                      Color(0xFF0284C7),
+                                    ],
+                                  ),
                                   borderRadius: BorderRadius.circular(16.0),
                                   boxShadow: [
                                     BoxShadow(
                                       color: AppColors.primary.withValues(
                                         alpha: 0.35,
                                       ),
-                                      blurRadius: 6,
+                                      blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
                                   ],
@@ -274,9 +242,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      Icons.add,
+                                      Icons.add_rounded,
                                       size: 15,
-                                      color: AppColors.neutral,
+                                      color: Colors.white,
                                     ),
                                     SizedBox(width: 4),
                                     Text(
@@ -284,7 +252,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.neutral,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
@@ -349,45 +317,10 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                 final city = displayedList[index];
                                 return SavedCityCard(
                                   city: city,
-                                  onFavoriteTap: () => _toggleFavorite(index),
                                   onTap: () => _onCityTap(city),
                                 );
                               }),
                             ),
-                    ),
-
-                    // 7. Quick City Suggestion Chips
-                    const SizedBox(height: 12),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Row(
-                        children: _quickChips.map((cityName) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: ActionChip(
-                              label: Text(cityName),
-                              labelStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.neutral,
-                              ),
-                              backgroundColor: AppColors.surface,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                side: const BorderSide(
-                                  color: AppColors.border,
-                                  width: 1.0,
-                                ),
-                              ),
-                              onPressed: () {
-                                _searchController.text = cityName;
-                                _onSearchChanged(cityName);
-                              },
-                            ),
-                          );
-                        }).toList(),
-                      ),
                     ),
 
                     const SizedBox(height: 10),
@@ -402,15 +335,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.only(top: 12.0),
+                padding: const EdgeInsets.only(top: 14.0),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       AppColors.background.withValues(alpha: 0.0),
-                      AppColors.background.withValues(alpha: 0.8),
-                      AppColors.background,
+                      AppColors.background.withValues(alpha: 0.35),
+                      AppColors.background.withValues(alpha: 0.70),
                     ],
                     stops: const [0.0, 0.45, 1.0],
                   ),

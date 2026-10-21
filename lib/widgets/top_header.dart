@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 
 class TopHeader extends StatelessWidget {
   final VoidCallback? onSettingsTap;
@@ -44,64 +45,34 @@ class TopHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              // Wordmark "WeatherMe"
+              // Wordmark "WeatherMe" — Bold & Modern
               RichText(
                 text: const TextSpan(
                   children: [
                     TextSpan(
                       text: 'Weather',
                       style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                        fontFamily: AppTypography.fontFamily,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
                         color: AppColors.neutral,
-                        letterSpacing: -0.3,
+                        letterSpacing: -0.6,
                       ),
                     ),
                     TextSpan(
                       text: 'Me',
                       style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.secondary,
-                        letterSpacing: -0.3,
+                        fontFamily: AppTypography.fontFamily,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary,
+                        letterSpacing: -0.6,
                       ),
                     ),
                   ],
                 ),
               ),
             ],
-          ),
-
-          // Preferences / Filter button
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onSettingsTap,
-              borderRadius: BorderRadius.circular(22),
-              child: Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.border, width: 1.2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.tune_rounded,
-                  size: 20,
-                  color: AppColors.neutral,
-                ),
-              ),
-            ),
           ),
         ],
       ),
