@@ -89,37 +89,45 @@ class WeatherApiResponse {
 
       // Parsing Hourly dari jam saat ini ke depan
       final hours = todayForecast['hour'] as List<dynamic>? ?? [];
-      final currentHourInt = _parseHourFromLocaltime(localTimeRaw);
+      final parsedHour = _parseHourFromLocaltime(localTimeRaw);
+      final currentHourInt = (parsedHour >= 0 && parsedHour < 24)
+          ? parsedHour
+          : DateTime.now().hour;
 
-      var startIndex = 0;
-      if (currentHourInt >= 0 && currentHourInt < hours.length) {
-        startIndex = currentHourInt;
-      }
+      // Slot 0: Waktu saat ini ("Sekarang") tersinkron dengan kondisi cuaca aktual
+      parsedHourly.add(
+        HourlyForecast(
+          time: 'Sekarang',
+          temperature: tempC.round(),
+          conditionType: _mapConditionType(conditionCode, conditionRawText),
+          isCurrent: true,
+        ),
+      );
 
-      for (var i = startIndex; i < hours.length && parsedHourly.length < 8; i++) {
+      // Slot jam berikutnya dari hari ini (strictly jam > currentHourInt, misal jam 15 -> jam 16, 17, dst)
+      for (var i = currentHourInt + 1;
+          i < hours.length && parsedHourly.length < 8;
+          i++) {
         final h = hours[i] as Map<String, dynamic>? ?? {};
         final timeStr = h['time']?.toString() ?? '';
         final hourPart = _extractHourString(timeStr);
-        final isCurrent = i == startIndex;
 
-        final hTemp = _toDouble(h['temp_c'])?.round() ?? 28;
+        final hTemp = _toDouble(h['temp_c'])?.round() ?? tempC.round();
         final hCond = h['condition'] as Map<String, dynamic>? ?? {};
         final hCode = _toInt(h['code']) ?? 1000;
         final hText = hCond['text']?.toString() ?? 'Clear';
 
         parsedHourly.add(
           HourlyForecast(
-            time: isCurrent ? 'Sekarang' : hourPart,
-            temperature: isCurrent ? tempC.round() : hTemp,
-            conditionType: isCurrent
-                ? _mapConditionType(conditionCode, conditionRawText)
-                : _mapConditionType(hCode, hText),
-            isCurrent: isCurrent,
+            time: hourPart,
+            temperature: hTemp,
+            conditionType: _mapConditionType(hCode, hText),
+            isCurrent: false,
           ),
         );
       }
 
-      // Jika slot jam hari ini kurang dari 8, lengkapi dari hari berikutnya
+      // Jika slot jam hari ini kurang dari 8, lengkapi dari jam awal hari berikutnya
       if (parsedHourly.length < 8 && forecastDays.length > 1) {
         final nextDayForecast = forecastDays[1] as Map<String, dynamic>? ?? {};
         final nextHours = nextDayForecast['hour'] as List<dynamic>? ?? [];
@@ -127,7 +135,7 @@ class WeatherApiResponse {
           final h = nextHours[i] as Map<String, dynamic>? ?? {};
           final timeStr = h['time']?.toString() ?? '';
           final hourPart = _extractHourString(timeStr);
-          final hTemp = _toDouble(h['temp_c'])?.round() ?? 28;
+          final hTemp = _toDouble(h['temp_c'])?.round() ?? tempC.round();
           final hCond = h['condition'] as Map<String, dynamic>? ?? {};
           final hCode = _toInt(h['code']) ?? 1000;
           final hText = hCond['text']?.toString() ?? 'Clear';
@@ -244,9 +252,9 @@ class WeatherApiResponse {
       maxTempC: maxTempC,
       minTempC: minTempC,
       rainChance: rainChance,
-      hourlyList: parsedHourly.isNotEmpty
+      hourlyList: parsedHourly.length > 1
           ? parsedHourly
-          : HourlyForecast.mockList,
+          : HourlyForecast.generateMockList(),
       dailyList: parsedDaily.isNotEmpty
           ? parsedDaily
           : DailyForecast.mockList,
@@ -333,6 +341,9 @@ class WeatherApiResponse {
         _toInt(forecastJson?['city']?['timezone']) ?? 25200;
 
     if (forecastList.isNotEmpty) {
+      final nowUtc = DateTime.now().toUtc();
+      final cityNow = nowUtc.add(Duration(seconds: timezoneOffsetSec));
+
       // Slot 0: Waktu saat ini ("Sekarang") tersinkron dengan kondisi cuaca aktual
       parsedHourly.add(
         HourlyForecast(
@@ -343,35 +354,52 @@ class WeatherApiResponse {
         ),
       );
 
-      // Hourly Forecast (ambil 7 slot berikutnya dari API = 21-24 jam ke depan)
-      for (var i = 0; i < forecastList.length && parsedHourly.length < 8; i++) {
-        final item = forecastList[i] as Map<String, dynamic>? ?? {};
-        final dtSec = _toInt(item['dt']) ?? 0;
-        final localDt = DateTime.fromMillisecondsSinceEpoch(
-          (dtSec + timezoneOffsetSec) * 1000,
-          isUtc: true,
-        );
-        final hourPart =
-            '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}';
+      // Buat prakiraan per jam sequential (hourly step) untuk jam-jam ke depan
+      // Misal jam sekarang 15:50 -> jam berikutnya 16:00, 17:00, 18:00, 19:00, dst.
+      // Jam masa lalu (seperti 11:00 atau 12:00) tidak akan pernah dimasukkan!
+      for (int offset = 1; offset <= 7; offset++) {
+        final targetTime = cityNow.add(Duration(hours: offset));
+        final targetHourStr =
+            '${targetTime.hour.toString().padLeft(2, '0')}:00';
 
-        final itemMain = item['main'] as Map<String, dynamic>? ?? {};
-        final hTemp = _toDouble(itemMain['temp'])?.round() ?? tempC.round();
+        // Cari slot OpenWeatherMap yang paling dekat waktunya dengan targetTime
+        Map<String, dynamic>? closestItem;
+        int minDiffSec = 999999999;
 
-        final itemWeather =
-            (item['weather'] as List<dynamic>?)?.firstOrNull
-                    as Map<String, dynamic>? ??
-                {};
-        final hCode = _toInt(itemWeather['id']) ?? 800;
-        final hText = itemWeather['main']?.toString() ?? 'Clear';
+        for (var item in forecastList) {
+          final itemMap = item as Map<String, dynamic>? ?? {};
+          final dtSec = _toInt(itemMap['dt']) ?? 0;
+          final slotCityTime = DateTime.fromMillisecondsSinceEpoch(
+            (dtSec + timezoneOffsetSec) * 1000,
+            isUtc: true,
+          );
+          final diff = (slotCityTime.difference(targetTime).inSeconds).abs();
+          if (diff < minDiffSec) {
+            minDiffSec = diff;
+            closestItem = itemMap;
+          }
+        }
 
-        parsedHourly.add(
-          HourlyForecast(
-            time: hourPart,
-            temperature: hTemp,
-            conditionType: _mapConditionType(hCode, hText),
-            isCurrent: false,
-          ),
-        );
+        if (closestItem != null) {
+          final itemMain = closestItem['main'] as Map<String, dynamic>? ?? {};
+          final hTemp = _toDouble(itemMain['temp'])?.round() ?? tempC.round();
+
+          final itemWeather =
+              (closestItem['weather'] as List<dynamic>?)?.firstOrNull
+                      as Map<String, dynamic>? ??
+                  {};
+          final hCode = _toInt(itemWeather['id']) ?? 800;
+          final hText = itemWeather['main']?.toString() ?? 'Clear';
+
+          parsedHourly.add(
+            HourlyForecast(
+              time: targetHourStr,
+              temperature: hTemp,
+              conditionType: _mapConditionType(hCode, hText),
+              isCurrent: false,
+            ),
+          );
+        }
       }
 
       // Kelompokkan per tanggal LOKAL berdasarkan timezone kota
@@ -533,7 +561,7 @@ class WeatherApiResponse {
       minTempC: minTempC,
       rainChance: rainChance,
       hourlyList:
-          parsedHourly.isNotEmpty ? parsedHourly : HourlyForecast.mockList,
+          parsedHourly.length > 1 ? parsedHourly : HourlyForecast.generateMockList(),
       dailyList: parsedDaily.isNotEmpty ? parsedDaily : DailyForecast.mockList,
       weeklyList:
           parsedWeekly.isNotEmpty ? parsedWeekly : WeeklyForecastItem.mockList,

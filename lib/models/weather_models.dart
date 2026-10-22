@@ -93,6 +93,7 @@ class HourlyForecast {
     this.isCurrent = false,
   });
 
+  /// Static const mockList dipertahankan agar Hot Reload Dart tidak menolak perubahan class const
   static const List<HourlyForecast> mockList = [
     HourlyForecast(
       time: 'Sekarang',
@@ -116,6 +117,41 @@ class HourlyForecast {
       conditionType: WeatherConditionType.partlyCloudy,
     ),
   ];
+
+  /// Menghasilkan daftar prakiraan per jam dinamis yang selalu mengikuti waktu lokal aktual saat ini.
+  /// Dimulai dari 'Sekarang', lalu diikuti jam-jam berikutnya (+1j, +2j, ...)
+  /// sehingga tidak pernah memunculkan jam di masa lalu (seperti jam 12:00 saat sekarang jam 15:00).
+  static List<HourlyForecast> generateMockList() {
+    final now = DateTime.now();
+    final list = <HourlyForecast>[
+      const HourlyForecast(
+        time: 'Sekarang',
+        temperature: 28,
+        conditionType: WeatherConditionType.partlyCloudy,
+        isCurrent: true,
+      ),
+    ];
+
+    for (int i = 1; i <= 7; i++) {
+      final hour = (now.hour + i) % 24;
+      final hourStr = '${hour.toString().padLeft(2, '0')}:00';
+      final isNight = hour >= 18 || hour < 6;
+      list.add(
+        HourlyForecast(
+          time: hourStr,
+          temperature: 28 + (i % 3 == 0 ? 1 : (i % 2 == 0 ? -1 : 0)),
+          conditionType: isNight
+              ? WeatherConditionType.cloudy
+              : (i.isEven
+                  ? WeatherConditionType.sunny
+                  : WeatherConditionType.partlyCloudy),
+          isCurrent: false,
+        ),
+      );
+    }
+
+    return list;
+  }
 }
 
 class DailyForecast {

@@ -192,12 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             const SizedBox(height: 14),
 
-                            // 5. Multi-Day Forecast Section (desain sama dengan halaman kalender)
+                            // 5. Multi-Day Forecast Section (desain sama dengan halaman kalender, tanpa tombol "Lihat Kalender")
                             WeeklyForecastSection(
                               weeklyList: _controller.weeklyForecasts,
                               title: 'Prakiraan 7 Hari Mendatang',
-                              actionLabel: 'Lihat Kalender',
-                              onDetailTap: _onCalendarActionTap,
                             ),
                           ],
                         ),

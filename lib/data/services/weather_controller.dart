@@ -33,7 +33,7 @@ class WeatherController extends ChangeNotifier {
   WeatherApiResponse? _weatherData;
 
   CurrentWeather _currentWeather = CurrentWeather.mock;
-  List<HourlyForecast> _hourlyForecasts = HourlyForecast.mockList;
+  List<HourlyForecast> _hourlyForecasts = HourlyForecast.generateMockList();
   List<DailyForecast> _dailyForecasts = DailyForecast.mockList;
   List<WeeklyForecastItem> _weeklyForecasts = WeeklyForecastItem.mockList;
   Map<int, CalendarDayForecast> _calendarForecastMap = {};
@@ -90,7 +90,7 @@ class WeatherController extends ChangeNotifier {
       _isLocating = false;
       _errorMessage = null;
       _currentWeather = CurrentWeather.mock;
-      _hourlyForecasts = HourlyForecast.mockList;
+      _hourlyForecasts = HourlyForecast.generateMockList();
       _dailyForecasts = DailyForecast.mockList;
       _weeklyForecasts = WeeklyForecastItem.mockList;
       _currentLocationCity = CityWeather.currentLocation;
@@ -129,7 +129,7 @@ class WeatherController extends ChangeNotifier {
       _isUsingApiData = false;
       // Tetap gunakan mock data yang ramah agar tampilan tidak rusak
       _currentWeather = CurrentWeather.mock;
-      _hourlyForecasts = HourlyForecast.mockList;
+      _hourlyForecasts = HourlyForecast.generateMockList();
       _dailyForecasts = DailyForecast.mockList;
       _weeklyForecasts = WeeklyForecastItem.mockList;
       _currentLocationCity = CityWeather.currentLocation;

@@ -98,5 +98,64 @@ void main() {
       expect(currentWeather.temperature, 28);
       expect(currentWeather.condition, isNotEmpty);
     });
+
+    test('HourlyForecast.mockList dynamically generates Sekarang and sequential future hours', () {
+      final mock = responseOrMock();
+      expect(mock.first.time, 'Sekarang');
+      expect(mock.first.isCurrent, isTrue);
+      expect(mock.length, greaterThanOrEqualTo(8));
+
+      // Verifikasi jam-jam berikutnya adalah jam berurutan
+      final now = DateTime.now();
+      for (int i = 1; i < mock.length; i++) {
+        final expectedHour = (now.hour + i) % 24;
+        final expectedHourStr = '${expectedHour.toString().padLeft(2, '0')}:00';
+        expect(mock[i].time, expectedHourStr);
+        expect(mock[i].isCurrent, isFalse);
+      }
+    });
+
+    test('fromOpenWeatherJson parses hourly forecast with Sekarang and sequential future hours', () {
+      final currentJson = {
+        'name': 'Malang',
+        'sys': {'country': 'ID'},
+        'main': {'temp': 30.0, 'feels_like': 32.0, 'humidity': 65, 'temp_max': 32.0, 'temp_min': 24.0},
+        'weather': [{'id': 800, 'main': 'Clear', 'description': 'langit cerah'}],
+        'wind': {'speed': 3.5},
+      };
+
+      final nowUtcSec = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
+      final forecastJson = {
+        'city': {'name': 'Malang', 'timezone': 25200},
+        'list': [
+          // Slot 3 jam ke depan
+          {
+            'dt': nowUtcSec + 7200, // +2 jam
+            'main': {'temp': 29.0},
+            'weather': [{'id': 801, 'main': 'Clouds', 'description': 'cerah berawan'}],
+          },
+          {
+            'dt': nowUtcSec + 18000, // +5 jam
+            'main': {'temp': 27.0},
+            'weather': [{'id': 802, 'main': 'Clouds', 'description': 'berawan'}],
+          },
+        ],
+      };
+
+      final response = WeatherApiResponse.fromOpenWeatherJson(currentJson, forecastJson);
+      expect(response.hourlyList.first.time, 'Sekarang');
+      expect(response.hourlyList.first.isCurrent, isTrue);
+
+      final nowCity = DateTime.now().toUtc().add(const Duration(seconds: 25200));
+      for (int i = 1; i < response.hourlyList.length; i++) {
+        final expectedHour = (nowCity.add(Duration(hours: i))).hour;
+        final expectedHourStr = '${expectedHour.toString().padLeft(2, '0')}:00';
+        expect(response.hourlyList[i].time, expectedHourStr);
+        expect(response.hourlyList[i].isCurrent, isFalse);
+      }
+    });
   });
 }
+
+List<dynamic> responseOrMock() => WeatherApiResponse.fromJson({}).hourlyList;
+
