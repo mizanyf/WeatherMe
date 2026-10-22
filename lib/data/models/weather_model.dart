@@ -881,22 +881,23 @@ class WeatherApiResponse {
     }
     // Cerah Berawan: matahari di kanan dan awan putih di kiri
     if (code == 801 ||
+        code == 802 ||
         code == 1003 ||
         lower.contains('partly') ||
         lower.contains('few clouds') ||
+        lower.contains('scattered') ||
+        lower.contains('tersebar') ||
         lower.contains('beberapa awan') ||
         lower.contains('cerah berawan')) {
       return WeatherConditionType.partlyCloudy;
     }
     // Berawan: awan putih saja (tanpa matahari dan bukan abu-abu)
-    if (code == 802 ||
-        code == 803 ||
+    if (code == 803 ||
         code == 1006 ||
         lower.contains('cloudy') ||
         lower.contains('clouds') ||
         lower.contains('berawan') ||
         lower.contains('sebagian') ||
-        lower.contains('scattered') ||
         lower.contains('broken') ||
         lower.contains('awan')) {
       return WeatherConditionType.cloudy;

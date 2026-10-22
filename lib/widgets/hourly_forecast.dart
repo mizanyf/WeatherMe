@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
-import 'weather_illustration.dart';
+import 'weather_icon.dart';
 
 class HourlyForecastSection extends StatelessWidget {
   final List<HourlyForecast> hourlyList;
@@ -25,7 +25,7 @@ class HourlyForecastSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
           child: const Text(
-            'Prakiraan Hari Ini',
+            'Perkiraan Hari Ini',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
@@ -59,6 +59,15 @@ class _HourlyForecastCard extends StatelessWidget {
   final HourlyForecast item;
 
   const _HourlyForecastCard({required this.item});
+
+  String _formatDisplayTime(String raw) {
+    if (raw == 'Sekarang') return raw;
+    final parts = raw.split(':');
+    if (parts.length >= 2) {
+      return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+    }
+    return raw;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +114,7 @@ class _HourlyForecastCard extends StatelessWidget {
             children: [
               // Time label
               Text(
-                item.time,
+                _formatDisplayTime(item.time),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isHighlighted ? FontWeight.w800 : FontWeight.w600,
@@ -116,10 +125,15 @@ class _HourlyForecastCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // Weather Illustration matching exact UI condition
-              WeatherIllustration(
-                size: 34,
-                conditionType: item.conditionType,
+              // Weather Icon matching calendar design & hourly condition
+              SizedBox(
+                height: 32,
+                child: Center(
+                  child: WeatherIcon(
+                    conditionType: item.conditionType,
+                    size: 26,
+                  ),
+                ),
               ),
 
               const SizedBox(height: 10),

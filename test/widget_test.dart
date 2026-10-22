@@ -24,7 +24,7 @@ void main() {
     expect(find.text('Sedang 5'), findsOneWidget);
 
     // Verify hourly forecast title
-    expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
+    expect(find.text('Perkiraan Hari Ini'), findsOneWidget);
 
     // Verify multi-day forecast title (3 hari mendatang di beranda)
     expect(find.text('Prakiraan 3 Hari Mendatang'), findsOneWidget);
@@ -68,7 +68,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify we are back on Home screen
-    expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
+    expect(find.text('Perkiraan Hari Ini'), findsOneWidget);
   });
 
   testWidgets('WeatherMe Locations screen navigation and interaction test', (
@@ -120,6 +120,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify we are back on Home screen
-    expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
+    expect(find.text('Perkiraan Hari Ini'), findsOneWidget);
   });
 }
