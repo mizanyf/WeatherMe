@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import 'weather_icon.dart';
 
 class WeeklyForecastSection extends StatelessWidget {
   final List<WeeklyForecastItem> weeklyList;
@@ -232,83 +233,15 @@ class WeeklyForecastTile extends StatelessWidget {
   }
 
   Widget _buildWeatherIcon(WeatherConditionType type) {
-    switch (type) {
-      case WeatherConditionType.sunny:
-        return const Icon(
-          Icons.wb_sunny_rounded,
+    return SizedBox(
+      width: 26,
+      height: 22,
+      child: Center(
+        child: WeatherIcon(
+          conditionType: type,
           size: 20,
-          color: AppColors.sunnyYellow,
-        );
-
-      case WeatherConditionType.partlyCloudy:
-        return Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: const Color(0xFFBAE6FD).withValues(alpha: 0.50),
-            shape: BoxShape.circle,
-          ),
-          child: const Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                top: 4,
-                right: 4,
-                child: Icon(
-                  Icons.wb_sunny_rounded,
-                  size: 11,
-                  color: AppColors.sunnyYellow,
-                ),
-              ),
-              Positioned(
-                bottom: 4,
-                left: 4,
-                child: Icon(
-                  Icons.cloud_rounded,
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        );
-
-      case WeatherConditionType.cloudy:
-        return Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: const Color(0xFFBAE6FD).withValues(alpha: 0.45),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.cloud_rounded,
-            size: 16,
-            color: Color(0xFF0284C7),
-          ),
-        );
-
-      case WeatherConditionType.overcast:
-        return Container(
-          width: 28,
-          height: 28,
-          decoration: const BoxDecoration(
-            color: Color(0xFFE2E8F0),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.cloud_rounded,
-            size: 16,
-            color: Color(0xFF64748B),
-          ),
-        );
-
-      case WeatherConditionType.rainy:
-        return const Icon(
-          Icons.grain_rounded,
-          size: 20,
-          color: AppColors.secondary,
-        );
-    }
+        ),
+      ),
+    );
   }
 }

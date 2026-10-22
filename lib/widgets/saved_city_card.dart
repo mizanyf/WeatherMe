@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import 'weather_icon.dart';
 
 class SavedCityCard extends StatelessWidget {
   final CityWeather city;
@@ -50,8 +51,17 @@ class SavedCityCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20.0),
               child: Row(
                 children: [
-                  // Circular Weather Icon
-                  _buildCircularIcon(city.conditionType),
+                  // Weather Icon matching calendar
+                  SizedBox(
+                    width: 38,
+                    height: 38,
+                    child: Center(
+                      child: WeatherIcon(
+                        conditionType: city.conditionType,
+                        size: 30,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 14),
 
                   // City Name & Condition with Max/Min
@@ -100,107 +110,5 @@ class SavedCityCard extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildCircularIcon(WeatherConditionType type) {
-    switch (type) {
-      case WeatherConditionType.sunny:
-        return Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF9E6),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.sunnyYellow.withValues(alpha: 0.2),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.wb_sunny_rounded,
-            size: 22,
-            color: AppColors.sunnyYellow,
-          ),
-        );
-
-      case WeatherConditionType.partlyCloudy:
-        return Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: AppColors.tertiary.withValues(alpha: 0.40),
-            shape: BoxShape.circle,
-          ),
-          child: const Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                top: 7,
-                right: 7,
-                child: Icon(
-                  Icons.wb_sunny_rounded,
-                  size: 14,
-                  color: AppColors.sunnyYellow,
-                ),
-              ),
-              Positioned(
-                bottom: 7,
-                left: 7,
-                child: Icon(
-                  Icons.cloud_rounded,
-                  size: 18,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        );
-
-      case WeatherConditionType.cloudy:
-        return Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: const Color(0xFFBAE6FD).withValues(alpha: 0.45),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.cloud_rounded,
-            size: 22,
-            color: Color(0xFF0284C7),
-          ),
-        );
-
-      case WeatherConditionType.overcast:
-        return Container(
-          width: 42,
-          height: 42,
-          decoration: const BoxDecoration(
-            color: Color(0xFFEBF0F2),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.cloud_rounded,
-            size: 22,
-            color: Color(0xFF4C6B73),
-          ),
-        );
-
-      case WeatherConditionType.rainy:
-        return Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: AppColors.tertiary.withValues(alpha: 0.40),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.grain_rounded,
-            size: 22,
-            color: AppColors.secondary,
-          ),
-        );
-    }
-  }
 }
+

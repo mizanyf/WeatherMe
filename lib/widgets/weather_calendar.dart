@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import 'weather_icon.dart';
 
 class WeatherCalendar extends StatefulWidget {
   final DateTime initialDate;
@@ -464,104 +465,16 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
             ),
             const SizedBox(height: 2),
             if (condition != null)
-              _buildSmallWeatherIcon(condition, isSelected)
+              WeatherIcon(
+                conditionType: condition,
+                size: 13,
+                color: isSelected ? Colors.white : null,
+              )
             else
               const SizedBox(height: 13),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildSmallWeatherIcon(
-    WeatherConditionType condition,
-    bool isSelected,
-  ) {
-    switch (condition) {
-      case WeatherConditionType.sunny:
-        return Icon(
-          Icons.wb_sunny_rounded,
-          size: 13,
-          color: isSelected ? Colors.white : const Color(0xFFF59E0B),
-        );
-
-      case WeatherConditionType.partlyCloudy:
-        return SizedBox(
-          width: 15,
-          height: 13,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Icon(
-                  Icons.wb_sunny_rounded,
-                  size: 9,
-                  color: isSelected ? Colors.white : const Color(0xFFF59E0B),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                bottom: 0,
-                child: Icon(
-                  Icons.cloud_rounded,
-                  size: 10,
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.90)
-                      : const Color(0xFF38BDF8),
-                ),
-              ),
-            ],
-          ),
-        );
-
-      case WeatherConditionType.cloudy:
-        return Icon(
-          Icons.cloud_rounded,
-          size: 13,
-          color: isSelected ? Colors.white : const Color(0xFF38BDF8),
-        );
-
-      case WeatherConditionType.overcast:
-        return Icon(
-          Icons.cloud_rounded,
-          size: 13,
-          color: isSelected
-              ? Colors.white
-              : const Color(0xFF64748B),
-        );
-
-      case WeatherConditionType.rainy:
-        return SizedBox(
-          width: 15,
-          height: 13,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                child: Icon(
-                  Icons.cloud_rounded,
-                  size: 10,
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.85)
-                      : const Color(0xFF64748B),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Icon(
-                  Icons.water_drop_rounded,
-                  size: 7,
-                  color: isSelected ? Colors.white : const Color(0xFF0284C7),
-                ),
-              ),
-            ],
-          ),
-        );
-    }
   }
 }
