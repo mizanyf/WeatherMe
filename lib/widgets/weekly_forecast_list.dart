@@ -7,11 +7,15 @@ import '../theme/app_colors.dart';
 
 class WeeklyForecastSection extends StatelessWidget {
   final List<WeeklyForecastItem> weeklyList;
+  final String title;
+  final String actionLabel;
   final VoidCallback? onDetailTap;
 
   const WeeklyForecastSection({
     super.key,
     required this.weeklyList,
+    this.title = 'Prakiraan 7 Hari Mendatang',
+    this.actionLabel = 'Detail',
     this.onDetailTap,
   });
 
@@ -27,30 +31,45 @@ class WeeklyForecastSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                'Prakiraan 7 Hari Mendatang',
-                style: TextStyle(
+              Text(
+                title,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: AppColors.neutral,
                   letterSpacing: -0.2,
                 ),
               ),
-              InkWell(
-                onTap: onDetailTap,
-                borderRadius: BorderRadius.circular(8),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                  child: Text(
-                    'Detail',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.secondary,
+              if (onDetailTap != null)
+                InkWell(
+                  onTap: onDetailTap,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4.0,
+                      vertical: 2.0,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          actionLabel,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: AppColors.secondary,
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
             ],
           ),
 
@@ -285,6 +304,21 @@ class WeeklyForecastTile extends StatelessWidget {
         );
 
       case WeatherConditionType.cloudy:
+        return Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: const Color(0xFFBAE6FD).withValues(alpha: 0.45),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.cloud_rounded,
+            size: 16,
+            color: Color(0xFF0284C7),
+          ),
+        );
+
+      case WeatherConditionType.overcast:
         return Container(
           width: 28,
           height: 28,

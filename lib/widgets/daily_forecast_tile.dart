@@ -290,6 +290,21 @@ class DailyForecastTile extends StatelessWidget {
         return Container(
           width: 34,
           height: 34,
+          decoration: BoxDecoration(
+            color: const Color(0xFFBAE6FD).withValues(alpha: 0.45),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.cloud_rounded,
+            size: 20,
+            color: Color(0xFF0284C7),
+          ),
+        );
+
+      case WeatherConditionType.overcast:
+        return Container(
+          width: 34,
+          height: 34,
           decoration: const BoxDecoration(
             color: Color(0xFFE2E8F0),
             shape: BoxShape.circle,

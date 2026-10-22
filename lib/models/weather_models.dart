@@ -1,4 +1,4 @@
-enum WeatherConditionType { sunny, partlyCloudy, cloudy, rainy }
+enum WeatherConditionType { sunny, partlyCloudy, cloudy, overcast, rainy }
 
 class CurrentWeather {
   final String location;
@@ -34,12 +34,42 @@ class CurrentWeather {
   String get safeUvIndex =>
       (uvIndex != null && uvIndex!.isNotEmpty) ? uvIndex! : 'Sedang 5';
 
+  CurrentWeather copyWith({
+    String? location,
+    String? condition,
+    WeatherConditionType? conditionType,
+    int? temperature,
+    String? dateTime,
+    int? maxTemp,
+    int? minTemp,
+    int? feelsLike,
+    int? humidity,
+    int? windSpeed,
+    String? rainChance,
+    String? uvIndex,
+  }) {
+    return CurrentWeather(
+      location: location ?? this.location,
+      condition: condition ?? this.condition,
+      conditionType: conditionType ?? this.conditionType,
+      temperature: temperature ?? this.temperature,
+      dateTime: dateTime ?? this.dateTime,
+      maxTemp: maxTemp ?? this.maxTemp,
+      minTemp: minTemp ?? this.minTemp,
+      feelsLike: feelsLike ?? this.feelsLike,
+      humidity: humidity ?? this.humidity,
+      windSpeed: windSpeed ?? this.windSpeed,
+      rainChance: rainChance ?? this.rainChance,
+      uvIndex: uvIndex ?? this.uvIndex,
+    );
+  }
+
   static const CurrentWeather mock = CurrentWeather(
     location: 'Malang, Indonesia',
     condition: 'Cerah Berawan',
     conditionType: WeatherConditionType.partlyCloudy,
     temperature: 28,
-    dateTime: 'Kamis, 24 Okt • 10:30 WIB',
+    dateTime: '10:30 WIB, Kamis, 24 Okt',
     maxTemp: 31,
     minTemp: 22,
     feelsLike: 30,
@@ -439,7 +469,7 @@ class CityWeather {
     maxTemp: 30,
     minTemp: 21,
     isCurrentLocation: true,
-    localTime: 'Waktu lokal 10:30 WIB',
+    localTime: '10:30 WIB, Kamis, 24 Okt',
   );
 
   /// Sample initial saved cities from specification
@@ -472,7 +502,7 @@ class CityWeather {
       country: 'Inggris',
       temperature: 14,
       condition: 'Mendung',
-      conditionType: WeatherConditionType.cloudy,
+      conditionType: WeatherConditionType.overcast,
       maxTemp: 16,
       minTemp: 9,
       isFavorite: true,
@@ -558,7 +588,7 @@ class CityWeather {
       country: 'Jerman',
       temperature: 13,
       condition: 'Mendung',
-      conditionType: WeatherConditionType.cloudy,
+      conditionType: WeatherConditionType.overcast,
       maxTemp: 15,
       minTemp: 8,
     ),

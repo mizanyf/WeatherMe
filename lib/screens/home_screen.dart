@@ -8,8 +8,8 @@ import '../theme/app_colors.dart';
 import '../widgets/app_background.dart';
 import '../widgets/current_weather_card.dart';
 import '../widgets/current_weather_metrics_card.dart';
-import '../widgets/daily_forecast_tile.dart';
 import '../widgets/hourly_forecast.dart';
+import '../widgets/weekly_forecast_list.dart';
 import '../widgets/location_feedback_dialog.dart';
 import '../widgets/top_header.dart';
 import '../widgets/weather_bottom_navigation.dart';
@@ -169,9 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             // 1. Top Header
                             TopHeader(
                               onSettingsTap: _onSettingsTap,
-                              onLocationTap: _useMyLocation,
-                              isLocating: _controller.isLocating,
-                              isDeviceLocation: _controller.isDeviceLocation,
                             ),
 
                             // Banner status data (Loading / Error / Live API / Demo)
@@ -195,10 +192,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             const SizedBox(height: 14),
 
-                            // 5. Three-Day Forecast Section
-                            DailyForecastSection(
-                              dailyList: _controller.dailyForecasts,
-                              onCalendarTap: _onCalendarActionTap,
+                            // 5. Multi-Day Forecast Section (desain sama dengan halaman kalender)
+                            WeeklyForecastSection(
+                              weeklyList: _controller.weeklyForecasts,
+                              title: 'Prakiraan 7 Hari Mendatang',
+                              actionLabel: 'Lihat Kalender',
+                              onDetailTap: _onCalendarActionTap,
                             ),
                           ],
                         ),

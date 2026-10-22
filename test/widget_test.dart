@@ -26,8 +26,8 @@ void main() {
     // Verify hourly forecast title
     expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
 
-    // Verify 3-day forecast title
-    expect(find.text('Prakiraan 3 Hari'), findsOneWidget);
+    // Verify multi-day forecast title (sama seperti halaman kalender)
+    expect(find.text('Prakiraan 7 Hari Mendatang'), findsOneWidget);
 
     // Verify bottom navigation items
     expect(find.text('Beranda'), findsOneWidget);

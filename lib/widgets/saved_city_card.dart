@@ -71,7 +71,7 @@ class SavedCityCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          '${city.condition} • M: ${city.maxTemp}° R: ${city.minTemp}°',
+                          '${city.condition} • Maks ${city.maxTemp}° Min ${city.minTemp}°',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -158,6 +158,21 @@ class SavedCityCard extends StatelessWidget {
         );
 
       case WeatherConditionType.cloudy:
+        return Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: const Color(0xFFBAE6FD).withValues(alpha: 0.45),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.cloud_rounded,
+            size: 22,
+            color: Color(0xFF0284C7),
+          ),
+        );
+
+      case WeatherConditionType.overcast:
         return Container(
           width: 42,
           height: 42,

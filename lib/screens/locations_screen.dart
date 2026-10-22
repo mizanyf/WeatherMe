@@ -206,9 +206,6 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           // 1. Top Header
                           TopHeader(
                             onSettingsTap: _onSettingsTap,
-                            onLocationTap: _useMyLocation,
-                            isLocating: _controller.isLocating,
-                            isDeviceLocation: _controller.isDeviceLocation,
                           ),
 
                           // 2. Locations Header

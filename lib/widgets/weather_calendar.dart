@@ -541,6 +541,12 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
         return Icon(
           Icons.cloud_rounded,
           size: 11,
+          color: isSelected ? Colors.white : const Color(0xFF38BDF8),
+        );
+      case WeatherConditionType.overcast:
+        return Icon(
+          Icons.cloud_rounded,
+          size: 11,
           color: isSelected ? Colors.white : const Color(0xFF64748B),
         );
       case WeatherConditionType.rainy:

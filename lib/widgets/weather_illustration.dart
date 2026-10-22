@@ -37,25 +37,27 @@ class WeatherIllustration extends StatelessWidget {
       case WeatherConditionType.partlyCloudy:
         return _buildPartlyCloudy(size);
       case WeatherConditionType.cloudy:
+        return _buildWhiteCloudy(size);
+      case WeatherConditionType.overcast:
         return _buildCloudy(size);
       case WeatherConditionType.rainy:
         return _buildRainy(size);
     }
   }
 
-  /// Cerah Berawan: Matahari emas bersinar dengan awan PUTIH BERSIH
-  /// Tidak ada warna hitam atau abu-abu sama sekali
+  /// Cerah Berawan: Matahari emas di kanan dengan awan PUTIH BERSIH di kiri
+  /// Sesuai permintaan: matahari sedikit ke kanan dan awan putih sedikit ke kiri
   Widget _buildPartlyCloudy(double size) {
     return Stack(
       alignment: Alignment.center,
       children: [
         // Background soft cyan/sky cloud (upper-left)
         Positioned(
-          top: size * 0.12,
-          left: size * 0.08,
+          top: size * 0.06,
+          left: size * 0.10,
           child: Container(
-            width: size * 0.42,
-            height: size * 0.26,
+            width: size * 0.40,
+            height: size * 0.25,
             decoration: BoxDecoration(
               color: const Color(0xFF86E7F2).withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(size * 0.2),
@@ -71,11 +73,11 @@ class WeatherIllustration extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 Positioned(
-                  top: -size * 0.08,
-                  left: size * 0.1,
+                  top: -size * 0.07,
+                  left: size * 0.09,
                   child: Container(
-                    width: size * 0.22,
-                    height: size * 0.22,
+                    width: size * 0.20,
+                    height: size * 0.20,
                     decoration: const BoxDecoration(
                       color: Color(0xFF9BEDF5),
                       shape: BoxShape.circle,
@@ -87,10 +89,10 @@ class WeatherIllustration extends StatelessWidget {
           ),
         ),
 
-        // Glowing Golden Sun (center-right)
+        // Glowing Golden Sun (shifted slightly to the right)
         Positioned(
-          top: size * 0.12,
-          right: size * 0.08,
+          top: size * 0.06,
+          right: size * 0.02,
           child: Container(
             width: size * 0.58,
             height: size * 0.58,
@@ -116,10 +118,10 @@ class WeatherIllustration extends StatelessWidget {
           ),
         ),
 
-        // Organic Front Puffy Cloud — 100% PURE WHITE (lower-right)
+        // Organic Front Puffy Cloud — 100% PURE WHITE (shifted slightly to the left)
         Positioned(
-          bottom: size * 0.08,
-          right: size * 0.02,
+          bottom: size * 0.06,
+          left: size * 0.04,
           child: Container(
             width: size * 0.68,
             height: size * 0.46,
@@ -191,6 +193,135 @@ class WeatherIllustration extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0FDFE),
                       borderRadius: BorderRadius.circular(size * 0.12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Berawan: Awan PUTIH BERSIH saja (tanpa matahari dan bukan mendung/abu-abu)
+  Widget _buildWhiteCloudy(double size) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Background soft cyan/sky cloud for beautiful depth
+        Positioned(
+          top: size * 0.12,
+          left: size * 0.10,
+          child: Container(
+            width: size * 0.52,
+            height: size * 0.32,
+            decoration: BoxDecoration(
+              color: const Color(0xFFBAE6FD).withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(size * 0.18),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.18),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: -size * 0.10,
+                  left: size * 0.14,
+                  child: Container(
+                    width: size * 0.28,
+                    height: size * 0.28,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFBAE6FD),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Foreground pure white fluffy cloud
+        Positioned(
+          bottom: size * 0.08,
+          right: size * 0.06,
+          child: Container(
+            width: size * 0.72,
+            height: size * 0.48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(size * 0.25),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.secondary.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Main top puff
+                Positioned(
+                  top: -size * 0.18,
+                  left: size * 0.20,
+                  child: Container(
+                    width: size * 0.36,
+                    height: size * 0.36,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                // Left puff
+                Positioned(
+                  top: -size * 0.09,
+                  left: size * 0.04,
+                  child: Container(
+                    width: size * 0.25,
+                    height: size * 0.25,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                // Right puff
+                Positioned(
+                  top: -size * 0.07,
+                  right: size * 0.06,
+                  child: Container(
+                    width: size * 0.24,
+                    height: size * 0.24,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                // Soft white-blue highlight puff
+                Positioned(
+                  bottom: size * 0.04,
+                  left: size * 0.12,
+                  child: Container(
+                    width: size * 0.44,
+                    height: size * 0.26,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDFE),
+                      borderRadius: BorderRadius.circular(size * 0.13),
                     ),
                   ),
                 ),

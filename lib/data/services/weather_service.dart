@@ -260,6 +260,33 @@ class WeatherService {
           await _client.get(currentUri).timeout(ApiConfig.requestTimeout);
       if (currentRes.statusCode == 200) {
         final currentBody = jsonDecode(currentRes.body) as Map<String, dynamic>;
+
+        // Jika pencarian berbasis koordinat, gunakan API Geocoding OpenWeatherMap untuk memperoleh
+        // nama kota yang sebenarnya (misalnya "Malang" alih-alih nama daerah administratif "Kabupaten Malang")
+        if (isCoords) {
+          try {
+            final geoUri = Uri.parse('https://api.openweathermap.org/geo/1.0/reverse')
+                .replace(queryParameters: {
+              'lat': queryParams['lat']!,
+              'lon': queryParams['lon']!,
+              'limit': '1',
+              'appid': ApiConfig.apiKey,
+            });
+            final geoRes =
+                await _client.get(geoUri).timeout(const Duration(seconds: 4));
+            if (geoRes.statusCode == 200) {
+              final geoList = jsonDecode(geoRes.body);
+              if (geoList is List && geoList.isNotEmpty) {
+                final geoMap = geoList.first as Map<String, dynamic>;
+                final cleanName = geoMap['name']?.toString();
+                if (cleanName != null && cleanName.isNotEmpty) {
+                  currentBody['name'] = cleanName;
+                }
+              }
+            }
+          } catch (_) {}
+        }
+
         Map<String, dynamic>? forecastBody;
         try {
           final forecastRes =

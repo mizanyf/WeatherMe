@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 import 'weather_illustration.dart';
 
 class CurrentLocationCard extends StatelessWidget {
@@ -82,42 +83,20 @@ class CurrentLocationCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Row: LOKASI SAAT INI label + Local Time
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Label — clean text
-                        const Text(
-                          'LOKASI SAAT INI',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-
-                        const SizedBox(width: 8),
-
-                        // Local Time
-                        Flexible(
-                          child: Text(
-                            city.localTime ?? 'Waktu lokal 10:30 WIB',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.mutedText,
-                            ),
-                          ),
-                        ),
-                      ],
+                    // Top Row: LOKASI SAAT INI label (tulisan waktu lokal dihilangkan sesuai permintaan user)
+                    const Text(
+                      'LOKASI SAAT INI',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                        letterSpacing: 0.8,
+                      ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Middle: City Name, Condition, and Illustration on Right
+                    // Middle: City Name, Condition, and Illustration on Right (diperbesar sesuai permintaan user)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -153,7 +132,7 @@ class CurrentLocationCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
 
-                        // Weather Illustration / Badge
+                        // Weather Illustration / Badge (diperbesar dari size 48 ke 68)
                         _buildIllustration(),
                       ],
                     ),
@@ -193,31 +172,23 @@ class CurrentLocationCard extends StatelessWidget {
                           ],
                         ),
 
-                        // Min and Max temperatures
+                        // Min and Max temperatures: Maks & Min
                         Row(
                           children: [
-                            const Icon(
-                              Icons.arrow_upward_rounded,
-                              size: 14,
-                              color: AppColors.secondary,
-                            ),
                             Text(
-                              ' ${city.maxTemp}°',
+                              'Maks ${city.maxTemp}°',
                               style: const TextStyle(
+                                fontFamily: AppTypography.fontFamily,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.neutral,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Icon(
-                              Icons.arrow_downward_rounded,
-                              size: 14,
-                              color: AppColors.mutedText,
-                            ),
                             Text(
-                              ' ${city.minTemp}°',
+                              'Min ${city.minTemp}°',
                               style: const TextStyle(
+                                fontFamily: AppTypography.fontFamily,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.mutedText,
@@ -315,7 +286,7 @@ class CurrentLocationCard extends StatelessWidget {
 
   Widget _buildIllustration() {
     return WeatherIllustration(
-      size: 48,
+      size: 68,
       conditionType: city.conditionType,
     );
   }

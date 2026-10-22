@@ -47,7 +47,8 @@ class WeatherApiResponse {
   factory WeatherApiResponse.fromJson(Map<String, dynamic> json) {
     // 1. Parsing Location
     final location = json['location'] as Map<String, dynamic>? ?? {};
-    final cityName = location['name']?.toString() ?? 'Malang';
+    final rawCity = location['name']?.toString() ?? 'Malang';
+    final cityName = _cleanCityName(rawCity);
     final countryName = location['country']?.toString() ?? 'Indonesia';
     final localTimeRaw = location['localtime']?.toString() ?? '';
 
@@ -86,16 +87,20 @@ class WeatherApiResponse {
       minTempC = _toDouble(todayDay['mintemp_c']) ?? minTempC;
       rainChance = _toInt(todayDay['daily_chance_of_rain']) ?? rainChance;
 
-      // Parsing Hourly dari hari ini & hari berikutnya
+      // Parsing Hourly dari jam saat ini ke depan
       final hours = todayForecast['hour'] as List<dynamic>? ?? [];
       final currentHourInt = _parseHourFromLocaltime(localTimeRaw);
 
-      for (var i = 0; i < hours.length; i++) {
+      var startIndex = 0;
+      if (currentHourInt >= 0 && currentHourInt < hours.length) {
+        startIndex = currentHourInt;
+      }
+
+      for (var i = startIndex; i < hours.length && parsedHourly.length < 8; i++) {
         final h = hours[i] as Map<String, dynamic>? ?? {};
         final timeStr = h['time']?.toString() ?? '';
         final hourPart = _extractHourString(timeStr);
-        final hourInt = int.tryParse(hourPart.split(':').first) ?? -1;
-        final isCurrent = hourInt == currentHourInt;
+        final isCurrent = i == startIndex;
 
         final hTemp = _toDouble(h['temp_c'])?.round() ?? 28;
         final hCond = h['condition'] as Map<String, dynamic>? ?? {};
@@ -105,11 +110,37 @@ class WeatherApiResponse {
         parsedHourly.add(
           HourlyForecast(
             time: isCurrent ? 'Sekarang' : hourPart,
-            temperature: hTemp,
-            conditionType: _mapConditionType(hCode, hText),
+            temperature: isCurrent ? tempC.round() : hTemp,
+            conditionType: isCurrent
+                ? _mapConditionType(conditionCode, conditionRawText)
+                : _mapConditionType(hCode, hText),
             isCurrent: isCurrent,
           ),
         );
+      }
+
+      // Jika slot jam hari ini kurang dari 8, lengkapi dari hari berikutnya
+      if (parsedHourly.length < 8 && forecastDays.length > 1) {
+        final nextDayForecast = forecastDays[1] as Map<String, dynamic>? ?? {};
+        final nextHours = nextDayForecast['hour'] as List<dynamic>? ?? [];
+        for (var i = 0; i < nextHours.length && parsedHourly.length < 8; i++) {
+          final h = nextHours[i] as Map<String, dynamic>? ?? {};
+          final timeStr = h['time']?.toString() ?? '';
+          final hourPart = _extractHourString(timeStr);
+          final hTemp = _toDouble(h['temp_c'])?.round() ?? 28;
+          final hCond = h['condition'] as Map<String, dynamic>? ?? {};
+          final hCode = _toInt(h['code']) ?? 1000;
+          final hText = hCond['text']?.toString() ?? 'Clear';
+
+          parsedHourly.add(
+            HourlyForecast(
+              time: hourPart,
+              temperature: hTemp,
+              conditionType: _mapConditionType(hCode, hText),
+              isCurrent: false,
+            ),
+          );
+        }
       }
 
       // Parsing Daily Forecast
@@ -202,7 +233,7 @@ class WeatherApiResponse {
     return WeatherApiResponse(
       cityName: cityName,
       countryName: countryName,
-      localTime: _formatDateTimeIndo(localTimeRaw),
+      localTime: formatDateTimeIndo(localTimeRaw),
       tempC: tempC,
       feelsLikeC: feelsLikeC,
       humidity: humidity,
@@ -256,7 +287,7 @@ class WeatherApiResponse {
       maxTemp: maxTempC.round(),
       minTemp: minTempC.round(),
       isCurrentLocation: isCurrentLocation,
-      localTime: localTime.isNotEmpty ? 'Waktu lokal $localTime' : null,
+      localTime: localTime.isNotEmpty ? localTime : null,
     );
   }
 
@@ -265,7 +296,8 @@ class WeatherApiResponse {
     Map<String, dynamic> currentJson,
     Map<String, dynamic>? forecastJson,
   ) {
-    final cityName = currentJson['name']?.toString() ?? 'Malang';
+    final rawCity = currentJson['name']?.toString() ?? 'Malang';
+    final cityName = _cleanCityName(rawCity);
     final sys = currentJson['sys'] as Map<String, dynamic>? ?? {};
     final countryCode = sys['country']?.toString() ?? 'ID';
     final countryName = countryCode == 'ID' ? 'Indonesia' : countryCode;
@@ -297,14 +329,33 @@ class WeatherApiResponse {
     final Map<int, CalendarDayForecast> parsedCalendar = {};
 
     final forecastList = forecastJson?['list'] as List<dynamic>? ?? [];
+    final timezoneOffsetSec =
+        _toInt(forecastJson?['city']?['timezone']) ?? 25200;
+
     if (forecastList.isNotEmpty) {
-      // Hourly Forecast (ambil 8 slot pertama = 24 jam)
-      for (var i = 0; i < forecastList.length && i < 8; i++) {
+      // Slot 0: Waktu saat ini ("Sekarang") tersinkron dengan kondisi cuaca aktual
+      parsedHourly.add(
+        HourlyForecast(
+          time: 'Sekarang',
+          temperature: tempC.round(),
+          conditionType: _mapConditionType(condCode, condDesc),
+          isCurrent: true,
+        ),
+      );
+
+      // Hourly Forecast (ambil 7 slot berikutnya dari API = 21-24 jam ke depan)
+      for (var i = 0; i < forecastList.length && parsedHourly.length < 8; i++) {
         final item = forecastList[i] as Map<String, dynamic>? ?? {};
-        final dtTxt = item['dt_txt']?.toString() ?? '';
-        final hourPart = _extractHourString(dtTxt);
+        final dtSec = _toInt(item['dt']) ?? 0;
+        final localDt = DateTime.fromMillisecondsSinceEpoch(
+          (dtSec + timezoneOffsetSec) * 1000,
+          isUtc: true,
+        );
+        final hourPart =
+            '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}';
+
         final itemMain = item['main'] as Map<String, dynamic>? ?? {};
-        final hTemp = _toDouble(itemMain['temp'])?.round() ?? 28;
+        final hTemp = _toDouble(itemMain['temp'])?.round() ?? tempC.round();
 
         final itemWeather =
             (item['weather'] as List<dynamic>?)?.firstOrNull
@@ -313,67 +364,81 @@ class WeatherApiResponse {
         final hCode = _toInt(itemWeather['id']) ?? 800;
         final hText = itemWeather['main']?.toString() ?? 'Clear';
 
-        final isCurrent = i == 0;
         parsedHourly.add(
           HourlyForecast(
-            time: isCurrent ? 'Sekarang' : hourPart,
+            time: hourPart,
             temperature: hTemp,
             conditionType: _mapConditionType(hCode, hText),
-            isCurrent: isCurrent,
+            isCurrent: false,
           ),
         );
       }
 
-      // Kelompokkan per tanggal
-      final Map<int, List<Map<String, dynamic>>> itemsByDay = {};
+      // Kelompokkan per tanggal LOKAL berdasarkan timezone kota
+      final Map<String, List<Map<String, dynamic>>> itemsByDay = {};
+      final Map<String, DateTime> dateObjectsByKey = {};
+
       for (var item in forecastList) {
         final itemMap = item as Map<String, dynamic>? ?? {};
-        final dtTxt = itemMap['dt_txt']?.toString() ?? '';
-        final dt = DateTime.tryParse(dtTxt);
-        if (dt != null) {
-          itemsByDay.putIfAbsent(dt.day, () => []).add(itemMap);
-        }
+        final dtSec = _toInt(itemMap['dt']) ?? 0;
+        final localDt = DateTime.fromMillisecondsSinceEpoch(
+          (dtSec + timezoneOffsetSec) * 1000,
+          isUtc: true,
+        );
+        final dateKey =
+            '${localDt.year}-${localDt.month.toString().padLeft(2, '0')}-${localDt.day.toString().padLeft(2, '0')}';
+        itemsByDay.putIfAbsent(dateKey, () => []).add(itemMap);
+        dateObjectsByKey.putIfAbsent(dateKey, () => localDt);
       }
 
+      final sortedDateKeys = itemsByDay.keys.toList()..sort();
       final now = DateTime.now();
+      final todayKey =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-      itemsByDay.forEach((dayNum, dayItems) {
+      for (var i = 0; i < sortedDateKeys.length; i++) {
+        final dateKey = sortedDateKeys[i];
+        final dayItems = itemsByDay[dateKey]!;
+        final dayDate = dateObjectsByKey[dateKey]!;
+        final bool isToday = dateKey == todayKey || i == 0;
+
         double dayMax = -100;
         double dayMin = 100;
         int maxPop = 0;
         String dayCondText = 'Cerah';
         int dayCondCode = 800;
-        DateTime dayDate = DateTime.now();
 
         Map<String, dynamic>? representativeSlot;
 
         for (var d in dayItems) {
-          final dDt =
-              DateTime.tryParse(d['dt_txt']?.toString() ?? '') ??
-              DateTime.now();
-          dayDate = dDt;
           final dMain = d['main'] as Map<String, dynamic>? ?? {};
           final tMax = _toDouble(dMain['temp_max']) ?? 28.0;
           final tMin = _toDouble(dMain['temp_min']) ?? 22.0;
           if (tMax > dayMax) dayMax = tMax;
           if (tMin < dayMin) dayMin = tMin;
 
-          final pop = (_toDouble(d['pop']) ?? 0.0) * 100;
-          if (pop.round() > maxPop) maxPop = pop.round();
+          final pop = ((_toDouble(d['pop']) ?? 0.0) * 100).round();
+          if (pop > maxPop) maxPop = pop;
+
+          final dtSec = _toInt(d['dt']) ?? 0;
+          final localHour = DateTime.fromMillisecondsSinceEpoch(
+            (dtSec + timezoneOffsetSec) * 1000,
+            isUtc: true,
+          ).hour;
 
           // Pilih slot siang (11:00 - 15:00) sebagai representasi cuaca harian yang akurat
-          final hour = dDt.hour;
-          if (representativeSlot == null || (hour >= 11 && hour <= 15)) {
+          if (representativeSlot == null ||
+              (localHour >= 11 && localHour <= 15)) {
             representativeSlot = d;
           }
         }
 
         final repWeather =
             (representativeSlot?['weather'] as List<dynamic>?)?.firstOrNull
-                as Map<String, dynamic>? ??
-            (dayItems.firstOrNull?['weather'] as List<dynamic>?)
-                ?.firstOrNull as Map<String, dynamic>? ??
-            {};
+                    as Map<String, dynamic>? ??
+                (dayItems.firstOrNull?['weather'] as List<dynamic>?)
+                        ?.firstOrNull as Map<String, dynamic>? ??
+                {};
         dayCondText = repWeather['description']?.toString() ??
             repWeather['main']?.toString() ??
             'Cerah';
@@ -402,17 +467,20 @@ class WeatherApiResponse {
         final dFormatted = '${dayDate.day} ${_getMonthNameIndo(dayDate.month)}';
         final cType = _mapConditionType(dayCondCode, dayCondText);
 
-        final bool isToday =
-            dayDate.day == now.day && dayDate.month == now.month;
+        final effMax = isToday ? maxTempC.round() : dayMax.round();
+        final effMin = isToday ? minTempC.round() : dayMin.round();
+        final effPop = isToday ? (maxPop > 0 ? maxPop : rainChance) : maxPop;
+        final effConditionType =
+            isToday ? _mapConditionType(condCode, condDesc) : cType;
 
         parsedDaily.add(
           DailyForecast(
             day: isToday ? 'Hari ini' : dName,
             date: dFormatted,
-            conditionType: isToday ? _mapConditionType(condCode, condDesc) : cType,
-            maxTemp: isToday ? maxTempC.round() : dayMax.round(),
-            minTemp: isToday ? minTempC.round() : dayMin.round(),
-            progress: 0.70,
+            conditionType: effConditionType,
+            maxTemp: effMax,
+            minTemp: effMin,
+            progress: ((effMax - effMin) / 15.0).clamp(0.35, 0.95),
           ),
         );
 
@@ -420,11 +488,11 @@ class WeatherApiResponse {
           WeeklyForecastItem(
             day: isToday ? 'Hari ini' : dName,
             date: dFormatted,
-            maxTemp: isToday ? maxTempC.round() : dayMax.round(),
-            minTemp: isToday ? minTempC.round() : dayMin.round(),
-            conditionType: isToday ? _mapConditionType(condCode, condDesc) : cType,
-            precipitation: isToday ? rainChance : maxPop,
-            progress: ((dayMax - dayMin) / 15.0).clamp(0.35, 0.95),
+            maxTemp: effMax,
+            minTemp: effMin,
+            conditionType: effConditionType,
+            precipitation: effPop,
+            progress: ((effMax - effMin) / 15.0).clamp(0.35, 0.95),
           ),
         );
 
@@ -432,30 +500,13 @@ class WeatherApiResponse {
           date: dayDate,
           dayName: dName,
           dateFormatted: dFormatted,
-          condition: isToday ? translatedCondition : _translateCondition(dayCondText),
-          conditionType: isToday ? _mapConditionType(condCode, condDesc) : cType,
-          temperature: isToday ? tempC.round() : ((dayMax + dayMin) / 2).round(),
-          maxTemp: isToday ? maxTempC.round() : dayMax.round(),
-          minTemp: isToday ? minTempC.round() : dayMin.round(),
-          rainChance: isToday ? '$rainChance%' : '$maxPop%',
-          humidity: isToday ? '$humidity%' : '$humidity%',
-          windSpeed: '${windKph.round()} km/j',
-          uvIndex: 'Sedang 5',
-        );
-      });
-
-      // Pastikan entri untuk hari ini selalu ada di calendarForecastMap
-      if (!parsedCalendar.containsKey(now.day)) {
-        parsedCalendar[now.day] = CalendarDayForecast(
-          date: now,
-          dayName: _getDayNameIndo(now.weekday),
-          dateFormatted: '${now.day} ${_getMonthNameIndo(now.month)}',
-          condition: translatedCondition,
-          conditionType: _mapConditionType(condCode, condDesc),
-          temperature: tempC.round(),
-          maxTemp: maxTempC.round(),
-          minTemp: minTempC.round(),
-          rainChance: '$rainChance%',
+          condition:
+              isToday ? translatedCondition : _translateCondition(dayCondText),
+          conditionType: effConditionType,
+          temperature: isToday ? tempC.round() : ((effMax + effMin) / 2).round(),
+          maxTemp: effMax,
+          minTemp: effMin,
+          rainChance: '$effPop%',
           humidity: '$humidity%',
           windSpeed: '${windKph.round()} km/j',
           uvIndex: 'Sedang 5',
@@ -470,7 +521,7 @@ class WeatherApiResponse {
     return WeatherApiResponse(
       cityName: cityName,
       countryName: countryName,
-      localTime: _formatDateTimeIndo(nowStr),
+      localTime: formatDateTimeIndo(nowStr),
       tempC: tempC,
       feelsLikeC: feelsLikeC,
       humidity: humidity,
@@ -494,6 +545,16 @@ class WeatherApiResponse {
   // HELPER PARSING & PENERJEMAHAN
   // ========================================================
 
+  static String _cleanCityName(String raw) {
+    var cleaned = raw.trim();
+    // Hilangkan prefix "Kabupaten " atau "Kab. " agar menampilkan nama kota, bukan nama daerah/kabupaten
+    cleaned = cleaned.replaceFirst(
+      RegExp(r'^(Kabupaten|Kab\.)\s+', caseSensitive: false),
+      '',
+    );
+    return cleaned.isNotEmpty ? cleaned : raw.trim();
+  }
+
   static double? _toDouble(dynamic val) {
     if (val == null) return null;
     if (val is num) return val.toDouble();
@@ -509,9 +570,12 @@ class WeatherApiResponse {
   static String _extractHourString(String timeStr) {
     try {
       final parts = timeStr.split(' ');
-      if (parts.length > 1) {
-        return parts[1];
+      final rawTime = parts.length > 1 ? parts[1] : timeStr;
+      final timeParts = rawTime.split(':');
+      if (timeParts.length >= 2) {
+        return '${timeParts[0]}:${timeParts[1]}';
       }
+      return rawTime;
     } catch (_) {}
     return timeStr;
   }
@@ -569,20 +633,31 @@ class WeatherApiResponse {
     return '';
   }
 
-  static String _formatDateTimeIndo(String rawLocaltime) {
+  static String formatDateTimeIndo([String? rawLocaltime]) {
     try {
-      // raw format: "2026-10-24 10:30"
-      final parts = rawLocaltime.split(' ');
-      if (parts.length >= 2) {
-        final date = DateTime.tryParse(parts[0]);
-        if (date != null) {
-          final dayName = _getDayNameIndo(date.weekday);
-          final monthName = _getMonthNameIndo(date.month);
-          return '$dayName, ${date.day} $monthName • ${parts[1]} WIB';
+      if (rawLocaltime != null && rawLocaltime.isNotEmpty) {
+        // raw format: "2026-10-24 10:30"
+        final parts = rawLocaltime.split(' ');
+        if (parts.length >= 2) {
+          final date = DateTime.tryParse(parts[0]);
+          if (date != null) {
+            final dayName = _getDayNameIndo(date.weekday);
+            final monthName = _getMonthNameIndo(date.month);
+            final timeStr = parts[1];
+            // Format baru: waktu jam di sebelah kiri hari, tanpa tanda bulatan (•)
+            return '$timeStr WIB, $dayName, ${date.day} $monthName';
+          }
         }
       }
     } catch (_) {}
-    return rawLocaltime;
+
+    // Fallback menggunakan waktu lokal perangkat saat ini
+    final now = DateTime.now();
+    final dayName = _getDayNameIndo(now.weekday);
+    final monthName = _getMonthNameIndo(now.month);
+    final hour = now.hour.toString().padLeft(2, '0');
+    final minute = now.minute.toString().padLeft(2, '0');
+    return '$hour:$minute WIB, $dayName, ${now.day} $monthName';
   }
 
   static String _formatUvIndex(int uv) {
@@ -765,29 +840,36 @@ class WeatherApiResponse {
         lower.contains('gerimis')) {
       return WeatherConditionType.rainy;
     }
+    // Mendung / Overcast: awan abu-abu atau hitam pekat
+    if (code == 804 ||
+        code == 1009 ||
+        lower.contains('overcast') ||
+        lower.contains('mendung') ||
+        lower.contains('tebal') ||
+        lower.contains('fog') ||
+        lower.contains('mist') ||
+        lower.contains('kabut')) {
+      return WeatherConditionType.overcast;
+    }
+    // Cerah Berawan: matahari di kanan dan awan putih di kiri
     if (code == 801 ||
-        code == 802 ||
-        code == 803 ||
         code == 1003 ||
         lower.contains('partly') ||
         lower.contains('few clouds') ||
-        lower.contains('sebagian') ||
-        lower.contains('scattered') ||
+        lower.contains('beberapa awan') ||
         lower.contains('cerah berawan')) {
       return WeatherConditionType.partlyCloudy;
     }
-    if (code == 804 ||
+    // Berawan: awan putih saja (tanpa matahari dan bukan abu-abu)
+    if (code == 802 ||
+        code == 803 ||
         code == 1006 ||
-        code == 1009 ||
         lower.contains('cloudy') ||
         lower.contains('clouds') ||
-        lower.contains('overcast') ||
-        lower.contains('fog') ||
-        lower.contains('mist') ||
         lower.contains('berawan') ||
-        lower.contains('mendung') ||
-        lower.contains('kabut') ||
-        lower.contains('tebal') ||
+        lower.contains('sebagian') ||
+        lower.contains('scattered') ||
+        lower.contains('broken') ||
         lower.contains('awan')) {
       return WeatherConditionType.cloudy;
     }

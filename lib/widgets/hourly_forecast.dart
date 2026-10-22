@@ -23,35 +23,14 @@ class HourlyForecastSection extends StatelessWidget {
         // Section Header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Prakiraan Hari Ini',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.neutral,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              InkWell(
-                onTap: onMoreTap,
-                borderRadius: BorderRadius.circular(8),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                  child: Text(
-                    '24 Jam Ke Depan',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.mutedText,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: const Text(
+            'Prakiraan Hari Ini',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: AppColors.neutral,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
 
@@ -216,6 +195,23 @@ class _HourlyForecastCard extends StatelessWidget {
         );
 
       case WeatherConditionType.cloudy:
+        return Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isHighlighted
+                ? const Color(0xFF48CBE8).withValues(alpha: 0.35)
+                : const Color(0xFFBAE6FD).withValues(alpha: 0.45),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.cloud_rounded,
+            size: 20,
+            color: Color(0xFF0284C7),
+          ),
+        );
+
+      case WeatherConditionType.overcast:
         return Container(
           width: 32,
           height: 32,
