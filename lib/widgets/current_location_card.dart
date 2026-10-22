@@ -4,14 +4,27 @@ import 'package:flutter/material.dart';
 
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import 'weather_illustration.dart';
 
 class CurrentLocationCard extends StatelessWidget {
   final CityWeather city;
+  final VoidCallback? onUseLocationTap;
+  final bool? isLocating;
+  final bool? isDeviceLocation;
 
-  const CurrentLocationCard({super.key, required this.city});
+  const CurrentLocationCard({
+    super.key,
+    required this.city,
+    this.onUseLocationTap,
+    this.isLocating = false,
+    this.isDeviceLocation = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final bool locating = isLocating == true;
+    final bool deviceLocation = isDeviceLocation == true;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -73,7 +86,7 @@ class CurrentLocationCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Label — clean text, no pill
+                        // Label — clean text
                         const Text(
                           'LOKASI SAAT INI',
                           style: TextStyle(
@@ -84,13 +97,19 @@ class CurrentLocationCard extends StatelessWidget {
                           ),
                         ),
 
+                        const SizedBox(width: 8),
+
                         // Local Time
-                        Text(
-                          city.localTime ?? 'Waktu lokal 10:30 WIB',
-                          style: const TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.mutedText,
+                        Flexible(
+                          child: Text(
+                            city.localTime ?? 'Waktu lokal 10:30 WIB',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.mutedText,
+                            ),
                           ),
                         ),
                       ],
@@ -103,29 +122,36 @@ class CurrentLocationCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              city.displayName,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.neutral,
-                                letterSpacing: -0.3,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                city.displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.neutral,
+                                  letterSpacing: -0.3,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              city.condition,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.mutedText,
+                              const SizedBox(height: 4),
+                              Text(
+                                city.condition,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.mutedText,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 10),
 
                         // Weather Illustration / Badge
                         _buildIllustration(),
@@ -201,6 +227,82 @@ class CurrentLocationCard extends StatelessWidget {
                         ),
                       ],
                     ),
+
+                    // Bottom Action: Gunakan Lokasi Saya / Perbarui Lokasi
+                    if (onUseLocationTap != null) ...[
+                      const SizedBox(height: 14),
+                      InkWell(
+                        onTap: locating ? null : onUseLocationTap,
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14.0,
+                            vertical: 10.0,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF48CBE8), // AppColors.primary
+                                Color(0xFF0284C7), // AppColors.secondary
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.32),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (locating) ...[
+                                const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Mencari lokasi...',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ] else ...[
+                                const Icon(
+                                  Icons.location_on_rounded,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  deviceLocation
+                                      ? 'Perbarui Lokasi Saat Ini'
+                                      : 'Gunakan Lokasi Saya',
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -212,59 +314,9 @@ class CurrentLocationCard extends StatelessWidget {
   }
 
   Widget _buildIllustration() {
-    return SizedBox(
-      width: 52,
-      height: 46,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Sun
-          Positioned(
-            top: 2,
-            right: 6,
-            child: Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const RadialGradient(
-                  colors: [Color(0xFFFFF099), AppColors.sunnyYellow],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.sunnyYellow.withValues(alpha: 0.4),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Cloud
-          Positioned(
-            bottom: 2,
-            left: 2,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.cloud_rounded,
-                size: 22,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return WeatherIllustration(
+      size: 48,
+      conditionType: city.conditionType,
     );
   }
 }

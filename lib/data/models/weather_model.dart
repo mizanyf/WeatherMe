@@ -158,21 +158,45 @@ class WeatherApiResponse {
           ),
         );
 
+        final now = DateTime.now();
+        final bool isToday =
+            fDateTime.day == now.day && fDateTime.month == now.month;
+
         parsedCalendar[fDateTime.day] = CalendarDayForecast(
           date: fDateTime,
           dayName: dayNameIndo,
           dateFormatted: dateFormattedIndo,
-          condition: _translateCondition(fCondText),
-          conditionType: conditionType,
-          temperature: fAvgTemp,
-          maxTemp: fMax,
-          minTemp: fMin,
-          rainChance: '$fRain%',
-          humidity: '$fHum%',
-          windSpeed: '$fWind km/j',
-          uvIndex: _formatUvIndex(fUv),
+          condition: isToday ? translatedCondition : _translateCondition(fCondText),
+          conditionType: isToday
+              ? _mapConditionType(conditionCode, conditionRawText)
+              : conditionType,
+          temperature: isToday ? tempC.round() : fAvgTemp,
+          maxTemp: isToday ? maxTempC.round() : fMax,
+          minTemp: isToday ? minTempC.round() : fMin,
+          rainChance: isToday ? '$rainChance%' : '$fRain%',
+          humidity: isToday ? '$humidity%' : '$fHum%',
+          windSpeed: isToday ? '${windKph.round()} km/j' : '$fWind km/j',
+          uvIndex: isToday ? _formatUvIndex(uvIndex.round()) : _formatUvIndex(fUv),
         );
       }
+    }
+
+    final nowTime = DateTime.now();
+    if (!parsedCalendar.containsKey(nowTime.day)) {
+      parsedCalendar[nowTime.day] = CalendarDayForecast(
+        date: nowTime,
+        dayName: _getDayNameIndo(nowTime.weekday),
+        dateFormatted: '${nowTime.day} ${_getMonthNameIndo(nowTime.month)}',
+        condition: translatedCondition,
+        conditionType: _mapConditionType(conditionCode, conditionRawText),
+        temperature: tempC.round(),
+        maxTemp: maxTempC.round(),
+        minTemp: minTempC.round(),
+        rainChance: '$rainChance%',
+        humidity: '$humidity%',
+        windSpeed: '${windKph.round()} km/j',
+        uvIndex: _formatUvIndex(uvIndex.round()),
+      );
     }
 
     return WeatherApiResponse(
@@ -207,6 +231,7 @@ class WeatherApiResponse {
     return CurrentWeather(
       location: '$cityName, $countryName',
       condition: conditionText,
+      conditionType: _mapConditionType(conditionCode, conditionText),
       temperature: tempC.round(),
       dateTime: localTime.isNotEmpty ? localTime : 'Hari ini',
       maxTemp: maxTempC.round(),
@@ -310,6 +335,8 @@ class WeatherApiResponse {
         }
       }
 
+      final now = DateTime.now();
+
       itemsByDay.forEach((dayNum, dayItems) {
         double dayMax = -100;
         double dayMin = 100;
@@ -317,6 +344,8 @@ class WeatherApiResponse {
         String dayCondText = 'Cerah';
         int dayCondCode = 800;
         DateTime dayDate = DateTime.now();
+
+        Map<String, dynamic>? representativeSlot;
 
         for (var d in dayItems) {
           final dDt =
@@ -332,40 +361,69 @@ class WeatherApiResponse {
           final pop = (_toDouble(d['pop']) ?? 0.0) * 100;
           if (pop.round() > maxPop) maxPop = pop.round();
 
-          final dWeather =
-              (d['weather'] as List<dynamic>?)?.firstOrNull
-                  as Map<String, dynamic>? ??
-              {};
-          dayCondText =
-              dWeather['description']?.toString() ??
-              dWeather['main']?.toString() ??
-              'Cerah';
-          dayCondCode = _toInt(dWeather['id']) ?? 800;
+          // Pilih slot siang (11:00 - 15:00) sebagai representasi cuaca harian yang akurat
+          final hour = dDt.hour;
+          if (representativeSlot == null || (hour >= 11 && hour <= 15)) {
+            representativeSlot = d;
+          }
+        }
+
+        final repWeather =
+            (representativeSlot?['weather'] as List<dynamic>?)?.firstOrNull
+                as Map<String, dynamic>? ??
+            (dayItems.firstOrNull?['weather'] as List<dynamic>?)
+                ?.firstOrNull as Map<String, dynamic>? ??
+            {};
+        dayCondText = repWeather['description']?.toString() ??
+            repWeather['main']?.toString() ??
+            'Cerah';
+        dayCondCode = _toInt(repWeather['id']) ?? 800;
+
+        // Jika ada probabilitas hujan tinggi pada hari tersebut, tampilkan cuaca hujan
+        if (maxPop >= 50) {
+          for (var d in dayItems) {
+            final dMap = d as Map<String, dynamic>? ?? {};
+            final wList = (dMap['weather'] as List<dynamic>?) ?? [];
+            for (var w in wList) {
+              final wMap = w as Map<String, dynamic>? ?? {};
+              final wId = _toInt(wMap['id']) ?? 800;
+              if (wId < 600) {
+                dayCondCode = wId;
+                dayCondText = wMap['description']?.toString() ??
+                    wMap['main']?.toString() ??
+                    dayCondText;
+                break;
+              }
+            }
+          }
         }
 
         final dName = _getDayNameIndo(dayDate.weekday);
         final dFormatted = '${dayDate.day} ${_getMonthNameIndo(dayDate.month)}';
         final cType = _mapConditionType(dayCondCode, dayCondText);
 
+        final bool isToday =
+            dayDate.day == now.day && dayDate.month == now.month;
+
         parsedDaily.add(
           DailyForecast(
-            day: dName,
+            day: isToday ? 'Hari ini' : dName,
             date: dFormatted,
-            conditionType: cType,
-            maxTemp: dayMax.round(),
-            minTemp: dayMin.round(),
+            conditionType: isToday ? _mapConditionType(condCode, condDesc) : cType,
+            maxTemp: isToday ? maxTempC.round() : dayMax.round(),
+            minTemp: isToday ? minTempC.round() : dayMin.round(),
             progress: 0.70,
           ),
         );
 
         parsedWeekly.add(
           WeeklyForecastItem(
-            day: dName,
+            day: isToday ? 'Hari ini' : dName,
             date: dFormatted,
-            maxTemp: dayMax.round(),
-            minTemp: dayMin.round(),
-            conditionType: cType,
-            precipitation: maxPop,
+            maxTemp: isToday ? maxTempC.round() : dayMax.round(),
+            minTemp: isToday ? minTempC.round() : dayMin.round(),
+            conditionType: isToday ? _mapConditionType(condCode, condDesc) : cType,
+            precipitation: isToday ? rainChance : maxPop,
             progress: ((dayMax - dayMin) / 15.0).clamp(0.35, 0.95),
           ),
         );
@@ -374,17 +432,35 @@ class WeatherApiResponse {
           date: dayDate,
           dayName: dName,
           dateFormatted: dFormatted,
-          condition: _translateCondition(dayCondText),
-          conditionType: cType,
-          temperature: ((dayMax + dayMin) / 2).round(),
-          maxTemp: dayMax.round(),
-          minTemp: dayMin.round(),
-          rainChance: '$maxPop%',
-          humidity: '$humidity%',
+          condition: isToday ? translatedCondition : _translateCondition(dayCondText),
+          conditionType: isToday ? _mapConditionType(condCode, condDesc) : cType,
+          temperature: isToday ? tempC.round() : ((dayMax + dayMin) / 2).round(),
+          maxTemp: isToday ? maxTempC.round() : dayMax.round(),
+          minTemp: isToday ? minTempC.round() : dayMin.round(),
+          rainChance: isToday ? '$rainChance%' : '$maxPop%',
+          humidity: isToday ? '$humidity%' : '$humidity%',
           windSpeed: '${windKph.round()} km/j',
           uvIndex: 'Sedang 5',
         );
       });
+
+      // Pastikan entri untuk hari ini selalu ada di calendarForecastMap
+      if (!parsedCalendar.containsKey(now.day)) {
+        parsedCalendar[now.day] = CalendarDayForecast(
+          date: now,
+          dayName: _getDayNameIndo(now.weekday),
+          dateFormatted: '${now.day} ${_getMonthNameIndo(now.month)}',
+          condition: translatedCondition,
+          conditionType: _mapConditionType(condCode, condDesc),
+          temperature: tempC.round(),
+          maxTemp: maxTempC.round(),
+          minTemp: minTempC.round(),
+          rainChance: '$rainChance%',
+          humidity: '$humidity%',
+          windSpeed: '${windKph.round()} km/j',
+          uvIndex: 'Sedang 5',
+        );
+      }
     }
 
     final now = DateTime.now();
@@ -517,44 +593,203 @@ class WeatherApiResponse {
     return 'Ekstrem $uv';
   }
 
-  /// Menerjemahkan deskripsi kondisi dari bahasa Inggris WeatherAPI ke Bahasa Indonesia
-  static String _translateCondition(String englishText) {
-    final lower = englishText.toLowerCase();
-    if (lower.contains('sunny') || lower.contains('clear')) {
-      return 'Cerah';
+  /// Menerjemahkan dan menstandarisasi deskripsi kondisi cuaca ke Bahasa Indonesia dengan kapitalisasi di awal kata
+  static String _translateCondition(String rawText) {
+    final clean = rawText.trim();
+    if (clean.isEmpty) return 'Cerah';
+    final lower = clean.toLowerCase();
+
+    // 1. Kamus padanan langsung istilah WeatherAPI, OpenWeatherMap, & BMKG
+    const exactMap = {
+      // OpenWeatherMap Clouds
+      'broken clouds': 'Berawan Tebal',
+      'scattered clouds': 'Berawan Sebagian',
+      'few clouds': 'Cerah Berawan',
+      'overcast clouds': 'Mendung',
+      'clear sky': 'Cerah',
+      'sunny': 'Cerah',
+      'clear': 'Cerah',
+      'partly cloudy': 'Cerah Berawan',
+      'cloudy': 'Berawan',
+      'overcast': 'Mendung',
+
+      // Rain & Drizzle
+      'light rain': 'Hujan Ringan',
+      'moderate rain': 'Hujan Sedang',
+      'heavy rain': 'Hujan Lebat',
+      'heavy intensity rain': 'Hujan Lebat',
+      'very heavy rain': 'Hujan Sangat Lebat',
+      'extreme rain': 'Hujan Ekstrem',
+      'freezing rain': 'Hujan Es',
+      'light intensity shower rain': 'Hujan Ringan',
+      'shower rain': 'Hujan',
+      'heavy intensity shower rain': 'Hujan Lebat',
+      'ragged shower rain': 'Hujan Lebat',
+      'light intensity drizzle': 'Gerimis Ringan',
+      'drizzle': 'Gerimis',
+      'heavy intensity drizzle': 'Gerimis Lebat',
+      'light intensity drizzle rain': 'Gerimis Ringan',
+      'drizzle rain': 'Hujan Gerimis',
+      'heavy intensity drizzle rain': 'Hujan Gerimis Lebat',
+      'shower rain and drizzle': 'Hujan Gerimis',
+      'heavy shower rain and drizzle': 'Hujan Gerimis Lebat',
+      'shower drizzle': 'Hujan Gerimis',
+
+      // Thunderstorm
+      'thunderstorm with light rain': 'Hujan Petir Ringan',
+      'thunderstorm with rain': 'Hujan Petir',
+      'thunderstorm with heavy rain': 'Hujan Petir Lebat',
+      'light thunderstorm': 'Petir Ringan',
+      'heavy thunderstorm': 'Badai Petir',
+      'ragged thunderstorm': 'Badai Petir',
+      'thunderstorm with light drizzle': 'Hujan Gerimis Petir',
+      'thunderstorm with drizzle': 'Hujan Gerimis Petir',
+      'thunderstorm with heavy drizzle': 'Hujan Gerimis Petir',
+      'thunderstorm': 'Hujan Petir',
+
+      // Atmosphere
+      'mist': 'Berkabut',
+      'smoke': 'Berasap',
+      'haze': 'Kabut Asap',
+      'sand/ dust whirls': 'Pusaran Debu',
+      'fog': 'Kabut',
+      'freezing fog': 'Kabut Beku',
+      'sand': 'Berpasir',
+      'dust': 'Berdebu',
+      'volcanic ash': 'Abu Vulkanik',
+      'squalls': 'Angin Kencang',
+      'tornado': 'Tornado',
+
+      // Snow
+      'light snow': 'Salju Ringan',
+      'snow': 'Salju',
+      'heavy snow': 'Salju Lebat',
+      'sleet': 'Hujan Salju',
+      'blizzard': 'Badai Salju',
+
+      // WeatherAPI specific
+      'patchy rain possible': 'Kemungkinan Hujan Ringan',
+      'patchy light drizzle': 'Gerimis Ringan',
+      'patchy light rain': 'Hujan Ringan',
+      'moderate rain at times': 'Hujan Sedang',
+      'heavy rain at times': 'Hujan Lebat',
+      'patchy light rain with thunder': 'Hujan Petir Ringan',
+      'moderate or heavy rain with thunder': 'Hujan Petir',
+      'light rain shower': 'Hujan Ringan',
+      'moderate or heavy rain shower': 'Hujan',
+      'torrential rain shower': 'Hujan Lebat',
+
+      // Istilah terjemahan OpenWeather (lang=id)
+      'awan pecah': 'Berawan Tebal',
+      'awan tersebar': 'Berawan Sebagian',
+      'beberapa awan': 'Cerah Berawan',
+      'awan mendung': 'Mendung',
+      'langit cerah': 'Cerah',
+      'hujan ringan': 'Hujan Ringan',
+      'hujan sedang': 'Hujan Sedang',
+      'hujan lebat': 'Hujan Lebat',
+      'hujan rintik-rintik': 'Gerimis',
+      'gerimis': 'Gerimis',
+      'badai petir': 'Hujan Petir',
+      'kabut': 'Berkabut',
+      'kabut asap': 'Kabut Asap',
+      'cerah': 'Cerah',
+      'berawan': 'Berawan',
+      'mendung': 'Mendung',
+    };
+
+    if (exactMap.containsKey(lower)) {
+      return exactMap[lower]!;
     }
-    if (lower.contains('partly cloudy')) {
-      return 'Cerah Berawan';
-    }
-    if (lower.contains('overcast') || lower.contains('cloudy')) {
-      return 'Mendung';
-    }
-    if (lower.contains('heavy rain') || lower.contains('torrential')) {
-      return 'Hujan Lebat';
-    }
-    if (lower.contains('thunder') || lower.contains('storm')) {
+
+    // 2. Fallback pencocokan kata kunci
+    if (lower.contains('thunder') || lower.contains('petir') || lower.contains('storm')) {
+      if (lower.contains('heavy') || lower.contains('lebat')) return 'Hujan Petir Lebat';
       return 'Hujan Petir';
     }
-    if (lower.contains('rain') || lower.contains('drizzle') || lower.contains('shower')) {
+    if (lower.contains('heavy rain') || lower.contains('torrential') || lower.contains('lebat')) {
+      return 'Hujan Lebat';
+    }
+    if (lower.contains('light rain') || lower.contains('drizzle') || lower.contains('gerimis') || lower.contains('patchy light rain')) {
+      return 'Hujan Ringan';
+    }
+    if (lower.contains('rain') || lower.contains('shower') || lower.contains('hujan')) {
       return 'Hujan';
     }
-    if (lower.contains('fog') || lower.contains('mist')) {
+    if (lower.contains('broken clouds')) {
+      return 'Berawan Tebal';
+    }
+    if (lower.contains('scattered clouds')) {
+      return 'Berawan Sebagian';
+    }
+    if (lower.contains('partly cloudy') || lower.contains('few clouds') || lower.contains('cerah berawan')) {
+      return 'Cerah Berawan';
+    }
+    if (lower.contains('overcast') || lower.contains('mendung')) {
+      return 'Mendung';
+    }
+    if (lower.contains('cloudy') || lower.contains('clouds') || lower.contains('berawan') || lower.contains('awan')) {
+      return 'Berawan';
+    }
+    if (lower.contains('sunny') || lower.contains('clear') || lower.contains('cerah')) {
+      return 'Cerah';
+    }
+    if (lower.contains('fog') || lower.contains('mist') || lower.contains('haze') || lower.contains('kabut')) {
       return 'Berkabut';
     }
-    return englishText;
+    if (lower.contains('snow') || lower.contains('salju') || lower.contains('ice') || lower.contains('sleet')) {
+      return 'Salju';
+    }
+
+    // 3. Fallback umum: Kapitalisasi awal setiap kata (Title Case)
+    return clean.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+    }).join(' ');
   }
 
-  /// Memetakan kondisi WeatherAPI ke enum UI `WeatherConditionType`
+  /// Public accessor untuk pemetaan conditionType
+  static WeatherConditionType mapConditionType(int code, String text) =>
+      _mapConditionType(code, text);
+
+  /// Memetakan kondisi WeatherAPI / OpenWeatherMap ke enum UI `WeatherConditionType`
   static WeatherConditionType _mapConditionType(int code, String text) {
     final lower = text.toLowerCase();
-    if (lower.contains('thunder') || lower.contains('storm') || lower.contains('rain') || lower.contains('drizzle') || lower.contains('shower')) {
+    if (lower.contains('thunder') ||
+        lower.contains('storm') ||
+        lower.contains('rain') ||
+        lower.contains('drizzle') ||
+        lower.contains('shower') ||
+        lower.contains('hujan') ||
+        lower.contains('petir') ||
+        lower.contains('gerimis')) {
       return WeatherConditionType.rainy;
     }
-    if (lower.contains('cloudy') || lower.contains('overcast') || lower.contains('fog') || lower.contains('mist')) {
-      return WeatherConditionType.cloudy;
-    }
-    if (lower.contains('partly')) {
+    if (code == 801 ||
+        code == 802 ||
+        code == 803 ||
+        code == 1003 ||
+        lower.contains('partly') ||
+        lower.contains('few clouds') ||
+        lower.contains('sebagian') ||
+        lower.contains('scattered') ||
+        lower.contains('cerah berawan')) {
       return WeatherConditionType.partlyCloudy;
+    }
+    if (code == 804 ||
+        code == 1006 ||
+        code == 1009 ||
+        lower.contains('cloudy') ||
+        lower.contains('clouds') ||
+        lower.contains('overcast') ||
+        lower.contains('fog') ||
+        lower.contains('mist') ||
+        lower.contains('berawan') ||
+        lower.contains('mendung') ||
+        lower.contains('kabut') ||
+        lower.contains('tebal') ||
+        lower.contains('awan')) {
+      return WeatherConditionType.cloudy;
     }
     return WeatherConditionType.sunny;
   }

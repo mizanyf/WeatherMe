@@ -9,11 +9,13 @@ import '../theme/app_colors.dart';
 class AddCityBottomSheet extends StatefulWidget {
   final List<CityWeather> currentSavedCities;
   final ValueChanged<CityWeather> onCityAdded;
+  final VoidCallback? onUseMyLocation;
 
   const AddCityBottomSheet({
     super.key,
     required this.currentSavedCities,
     required this.onCityAdded,
+    this.onUseMyLocation,
   });
 
   @override
@@ -182,7 +184,60 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                // Opsi Cepat: Gunakan Lokasi Saya
+                if (widget.onUseMyLocation != null &&
+                    _searchController.text.trim().isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 10.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        widget.onUseMyLocation?.call();
+                      },
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14.0,
+                          vertical: 10.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16.0),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.25),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_rounded,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Gunakan Lokasi Saya',
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 4),
 
                 // Available Cities List
                 Flexible(

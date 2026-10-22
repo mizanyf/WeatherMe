@@ -3,6 +3,7 @@ enum WeatherConditionType { sunny, partlyCloudy, cloudy, rainy }
 class CurrentWeather {
   final String location;
   final String condition;
+  final WeatherConditionType conditionType;
   final int temperature;
   final String dateTime;
   final int maxTemp;
@@ -16,6 +17,7 @@ class CurrentWeather {
   const CurrentWeather({
     required this.location,
     required this.condition,
+    this.conditionType = WeatherConditionType.sunny,
     required this.temperature,
     required this.dateTime,
     required this.maxTemp,
@@ -35,6 +37,7 @@ class CurrentWeather {
   static const CurrentWeather mock = CurrentWeather(
     location: 'Malang, Indonesia',
     condition: 'Cerah Berawan',
+    conditionType: WeatherConditionType.partlyCloudy,
     temperature: 28,
     dateTime: 'Kamis, 24 Okt • 10:30 WIB',
     maxTemp: 31,

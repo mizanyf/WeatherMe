@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
 
 class CalendarHeader extends StatelessWidget {
   final String location;
@@ -42,63 +41,32 @@ class CalendarHeader extends StatelessWidget {
               color: AppColors.mutedText,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // Location Selector — Frosted Glass Pill
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: AppColors.glassBlurSigmaLight,
-                sigmaY: AppColors.glassBlurSigmaLight,
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onLocationTap,
-                  borderRadius: BorderRadius.circular(18),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 6.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.glassFill,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: AppColors.glassBorder,
-                        width: 1.0,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadow,
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.location_on_rounded,
-                          size: 15,
-                          color: AppColors.secondary,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          location,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.neutral,
-                          ),
-                        ),
-                      ],
-                    ),
+          // Location Selector — Tampilan bersih tanpa widget background (mirip beranda)
+          InkWell(
+            onTap: onLocationTap,
+            borderRadius: BorderRadius.circular(6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.location_on_rounded,
+                  size: 15,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  location,
+                  style: const TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.mutedText,
+                    letterSpacing: -0.1,
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],

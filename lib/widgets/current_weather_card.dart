@@ -157,8 +157,11 @@ class CurrentWeatherCard extends StatelessWidget {
                           ],
                         ),
 
-                        // Layered Sun & Cloud Illustration
-                        const WeatherIllustration(size: 116),
+                        // Layered Weather Illustration matching current condition
+                        WeatherIllustration(
+                          size: 116,
+                          conditionType: weather.conditionType,
+                        ),
                       ],
                     ),
 

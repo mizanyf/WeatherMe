@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../data/models/weather_model.dart';
+import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
 
@@ -60,6 +62,22 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
     );
   }
 
+  @override
+  void didUpdateWidget(WeatherCalendar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialDate.year != widget.initialDate.year ||
+        oldWidget.initialDate.month != widget.initialDate.month ||
+        oldWidget.initialDate.day != widget.initialDate.day) {
+      setState(() {
+        _selectedDate = widget.initialDate;
+        _displayedMonth = DateTime(
+          widget.initialDate.year,
+          widget.initialDate.month,
+        );
+      });
+    }
+  }
+
   void _goToPreviousMonth() {
     setState(() {
       _displayedMonth = DateTime(
@@ -87,8 +105,44 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
 
   /// Helper to determine weather icon for a date
   WeatherConditionType? _getConditionForDate(DateTime date) {
-    // Only return mock forecast indicators for October 2026
+    final now = DateTime.now();
+    final bool isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
+    final controller = WeatherController.instance;
+
+    // Untuk hari ini, selalu sinkron dengan Beranda
+    if (isToday && controller.isUsingApiData) {
+      if (controller.weatherData != null) {
+        return WeatherApiResponse.mapConditionType(
+          controller.weatherData!.conditionCode,
+          controller.currentWeather.condition,
+        );
+      }
+      return WeatherConditionType.sunny;
+    }
+
+    // 1. Periksa data perkiraan dari API aktual jika tersedia
+    if (controller.isUsingApiData && controller.calendarForecastMap.isNotEmpty) {
+      for (final f in controller.calendarForecastMap.values) {
+        if (f.date.year == date.year &&
+            f.date.month == date.month &&
+            f.date.day == date.day) {
+          return f.conditionType;
+        }
+      }
+      if (controller.calendarForecastMap.containsKey(date.day)) {
+        final f = controller.calendarForecastMap[date.day]!;
+        if (f.date.month == date.month) {
+          return f.conditionType;
+        }
+      }
+    }
+
+    // 2. Fallback untuk data mock kalender Oktober 2026
     if (date.year == 2026 && date.month == 10) {
+      if (CalendarDayForecast.mockOctober.containsKey(date.day)) {
+        return CalendarDayForecast.mockOctober[date.day]?.conditionType;
+      }
       if (date.day >= 7 && date.day <= 13) {
         if (date.day == 9) return WeatherConditionType.cloudy;
         if (date.day == 10) return WeatherConditionType.rainy;
@@ -99,10 +153,6 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
           return WeatherConditionType.cloudy;
         }
         return WeatherConditionType.sunny;
-      }
-      if (date.day >= 21 && date.day <= 27) {
-        final mock = CalendarDayForecast.mockOctober[date.day];
-        return mock?.conditionType ?? WeatherConditionType.sunny;
       }
       if (date.day >= 28 && date.day <= 31) {
         if (date.day == 29) return WeatherConditionType.partlyCloudy;
@@ -317,10 +367,11 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
                                 _selectedDate.month == currentDate.month &&
                                 _selectedDate.day == currentDate.day;
 
+                            final now = DateTime.now();
                             final isToday =
-                                currentDate.year == 2026 &&
-                                currentDate.month == 10 &&
-                                currentDate.day == 21;
+                                currentDate.year == now.year &&
+                                currentDate.month == now.month &&
+                                currentDate.day == now.day;
 
                             final condition = _getConditionForDate(currentDate);
 
@@ -484,7 +535,7 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
         return Icon(
           Icons.wb_cloudy_rounded,
           size: 11,
-          color: isSelected ? Colors.white : Colors.white,
+          color: isSelected ? Colors.white : const Color(0xFF0284C7),
         );
       case WeatherConditionType.cloudy:
         return Icon(

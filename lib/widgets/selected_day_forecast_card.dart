@@ -125,8 +125,7 @@ class SelectedDayForecastCard extends StatelessWidget {
                       children: [
                         // Temperature & Max/Min
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               '${forecast.temperature}°',
@@ -140,28 +139,31 @@ class SelectedDayForecastCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Maks ${forecast.maxTemp}°',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.neutral,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Maks ${forecast.maxTemp}°',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.neutral,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Min ${forecast.minTemp}°',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.mutedText,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Min ${forecast.minTemp}°',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.mutedText,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),

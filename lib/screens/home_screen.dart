@@ -10,6 +10,7 @@ import '../widgets/current_weather_card.dart';
 import '../widgets/current_weather_metrics_card.dart';
 import '../widgets/daily_forecast_tile.dart';
 import '../widgets/hourly_forecast.dart';
+import '../widgets/location_feedback_dialog.dart';
 import '../widgets/top_header.dart';
 import '../widgets/weather_bottom_navigation.dart';
 
@@ -29,6 +30,57 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Memuat data cuaca dari WeatherAPI saat pertama kali dibuka
     _controller.fetchWeather();
+  }
+
+  Future<void> _useMyLocation() async {
+    final result = await _controller.fetchWeatherByCurrentLocation();
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Lokasi terdeteksi: ${_controller.currentCity}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
+    } else {
+      LocationFeedbackDialog.show(
+        context,
+        result: result,
+        onManualSearchSelected: () {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const LocationsScreen(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
+        },
+        onRetry: () => _useMyLocation(),
+      );
+    }
   }
 
   void _onNavTapped(int index) {
@@ -115,7 +167,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // 1. Top Header
-                            TopHeader(onSettingsTap: _onSettingsTap),
+                            TopHeader(
+                              onSettingsTap: _onSettingsTap,
+                              onLocationTap: _useMyLocation,
+                              isLocating: _controller.isLocating,
+                              isDeviceLocation: _controller.isDeviceLocation,
+                            ),
 
                             // Banner status data (Loading / Error / Live API / Demo)
                             _buildApiStatusBanner(),
@@ -185,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Banner status sumber data yang elegan & informatif
   Widget _buildApiStatusBanner() {
-    if (_controller.isLoading) {
+    if (_controller.isLoading == true) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
         child: ClipRRect(
@@ -229,7 +286,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             InkWell(
-              onTap: () => _controller.fetchWeather(),
+              onTap: () {
+                if (_controller.isLocating == true) {
+                  _useMyLocation();
+                } else {
+                  _controller.fetchWeather();
+                }
+              },
               borderRadius: BorderRadius.circular(6),
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -244,45 +307,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    }
-
-    if (_controller.isUsingApiData) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 3.0,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(color: const Color(0xFFA7F3D0), width: 0.8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    size: 12,
-                    color: Color(0xFF059669),
+            const SizedBox(width: 4),
+            InkWell(
+              onTap: () {
+                _controller.clearError();
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const LocationsScreen(),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Live API • ${_controller.currentCity}',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF047857),
-                    ),
+                );
+              },
+              borderRadius: BorderRadius.circular(6),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Text(
+                  'Pilih Kota',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                    decoration: TextDecoration.underline,
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -290,47 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    // Jika API Key belum diisi (Mode Demo)
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Tooltip(
-            message: 'Buka file .env dan isi WEATHER_API_KEY untuk data live',
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 3.0,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.70),
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(color: AppColors.glassBorder, width: 0.8),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.cloud_outlined,
-                    size: 12,
-                    color: AppColors.mutedText,
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    'Mode Demo (Mock Data)',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.mutedText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    // Tampilan status badge (Live API / Mode Demo) dihilangkan sesuai permintaan
+    return const SizedBox.shrink();
   }
 }

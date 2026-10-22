@@ -5,11 +5,23 @@ import '../theme/app_typography.dart';
 
 class TopHeader extends StatelessWidget {
   final VoidCallback? onSettingsTap;
+  final VoidCallback? onLocationTap;
+  final bool? isLocating;
+  final bool? isDeviceLocation;
 
-  const TopHeader({super.key, this.onSettingsTap});
+  const TopHeader({
+    super.key,
+    this.onSettingsTap,
+    this.onLocationTap,
+    this.isLocating = false,
+    this.isDeviceLocation = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final bool locating = isLocating == true;
+    final bool deviceLocation = isDeviceLocation == true;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 8.0),
       child: Row(
@@ -75,6 +87,69 @@ class TopHeader extends StatelessWidget {
               ),
             ],
           ),
+
+          // Right side: Gunakan Lokasi Saya quick action
+          if (onLocationTap != null)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: locating ? null : onLocationTap,
+                borderRadius: BorderRadius.circular(16.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6.0,
+                    vertical: 4.0,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (locating) ...[
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        const Text(
+                          'Mencari...',
+                          style: TextStyle(
+                            fontFamily: AppTypography.fontFamily,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ] else ...[
+                        Icon(
+                          deviceLocation
+                              ? Icons.location_on_rounded
+                              : Icons.location_on_outlined,
+                          size: 15,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          deviceLocation
+                              ? 'Lokasi Saya'
+                              : 'Gunakan Lokasi',
+                          style: const TextStyle(
+                            fontFamily: AppTypography.fontFamily,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

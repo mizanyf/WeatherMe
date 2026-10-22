@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/config/api_config.dart';
 import '../../models/weather_models.dart';
 import '../models/weather_model.dart';
+import 'location_service.dart';
 import 'weather_service.dart';
 
 /// Centralized State Controller untuk cuaca di seluruh aplikasi WeatherMe.
@@ -15,6 +16,10 @@ class WeatherController extends ChangeNotifier {
   static final WeatherController instance = WeatherController._internal();
 
   WeatherController._internal() {
+    _isLoading = false;
+    _isLocating = false;
+    _isDeviceLocation = false;
+    _isUsingApiData = false;
     _savedCities = List.from(CityWeather.initialSavedCities);
   }
 
@@ -35,6 +40,10 @@ class WeatherController extends ChangeNotifier {
   late List<CityWeather> _savedCities;
 
   bool _isLoading = false;
+  bool _isLocating = false;
+  bool _isDeviceLocation = false;
+  double? _deviceLatitude;
+  double? _deviceLongitude;
   String? _errorMessage;
   bool _isUsingApiData = false;
 
@@ -53,9 +62,13 @@ class WeatherController extends ChangeNotifier {
   CityWeather get currentLocationCity => _currentLocationCity;
   List<CityWeather> get savedCities => List.unmodifiable(_savedCities);
 
-  bool get isLoading => _isLoading;
+  bool get isLoading => (_isLoading as dynamic) == true;
+  bool get isLocating => (_isLocating as dynamic) == true;
+  bool get isDeviceLocation => (_isDeviceLocation as dynamic) == true;
+  double? get deviceLatitude => _deviceLatitude;
+  double? get deviceLongitude => _deviceLongitude;
   String? get errorMessage => _errorMessage;
-  bool get isUsingApiData => _isUsingApiData;
+  bool get isUsingApiData => (_isUsingApiData as dynamic) == true;
 
   // ========================================================
   // ACTIONS & DATA FETCHING
@@ -65,12 +78,14 @@ class WeatherController extends ChangeNotifier {
   Future<void> fetchWeather({String? city}) async {
     if (city != null && city.trim().isNotEmpty) {
       _currentCity = city.trim();
+      _isDeviceLocation = false;
     }
 
     // Jika API Key belum diisi di .env, tetap dalam Mode Demo/Mock
     if (!ApiConfig.isApiKeyConfigured) {
       _isUsingApiData = false;
       _isLoading = false;
+      _isLocating = false;
       _errorMessage = null;
       _currentWeather = CurrentWeather.mock;
       _hourlyForecasts = HourlyForecast.mockList;
@@ -120,8 +135,108 @@ class WeatherController extends ChangeNotifier {
     }
   }
 
+  /// Mengambil data cuaca berdasarkan lokasi GPS perangkat saat ini
+  /// menggunakan [LocationService] dan WeatherAPI.com (q=latitude,longitude).
+  ///
+  /// Menangani seluruh alur:
+  /// 1. Pengecekan GPS & permission lokasi
+  /// 2. Permintaan izin jika belum diberikan
+  /// 3. Perolehan koordinat perangkat
+  /// 4. Permintaan cuaca ke WeatherAPI.com dengan q=latitude,longitude
+  /// 5. Pembaruan state dan UI dengan nama lokasi resmi dari respons API
+  /// 6. Penanganan kegagalan dengan aman tanpa mengklaim lokasi palsu
+  Future<LocationResult> fetchWeatherByCurrentLocation() async {
+    _isLocating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final locationResult = await LocationService.instance.determinePosition();
+
+    if (!locationResult.isSuccess) {
+      _isLocating = false;
+      // Jangan mengklaim lokasi pengguna sudah diperoleh jika izin/koordinat gagal
+      _errorMessage = locationResult.errorMessage;
+      notifyListeners();
+      return locationResult;
+    }
+
+    final pos = locationResult.position!;
+    _deviceLatitude = pos.latitude;
+    _deviceLongitude = pos.longitude;
+
+    // Jika API Key belum diisi di .env, beri tahu pengguna
+    if (!ApiConfig.isApiKeyConfigured) {
+      _isLocating = false;
+      _isUsingApiData = false;
+      _isDeviceLocation = false;
+      _errorMessage =
+          'API Key belum diisi di file .env (WEATHER_API_KEY). Silakan masukkan API Key Anda.';
+      notifyListeners();
+      return LocationResult(
+        status: LocationStatus.locationError,
+        errorMessage: _errorMessage,
+      );
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // 6. Kirim koordinat ke WeatherAPI.com menggunakan parameter q=latitude,longitude
+      final coordsQuery = '${pos.latitude},${pos.longitude}';
+      final response = await WeatherService.instance.getForecast(
+        query: coordsQuery,
+        days: 7,
+      );
+
+      // 7. Perbarui data cuaca pada UI berdasarkan respons API dan tampilkan nama lokasi dari respons API
+      _weatherData = response;
+      _currentCity = response.cityName;
+      _currentWeather = response.toCurrentWeather();
+      _hourlyForecasts = response.hourlyList;
+      _dailyForecasts = response.dailyList;
+      _weeklyForecasts = response.weeklyList;
+      _calendarForecastMap = response.calendarForecastMap;
+
+      // Update lokasi saat ini dengan nama lokasi dari respons API
+      _currentLocationCity = response.toCityWeather(isCurrentLocation: true);
+
+      _isUsingApiData = true;
+      _isDeviceLocation = true;
+      _isLoading = false;
+      _isLocating = false;
+      _errorMessage = null;
+
+      // Update juga data kota tersimpan jika ada yang sama dengan kota aktif
+      _updateSavedCityWeather(response.toCityWeather());
+
+      notifyListeners();
+      return locationResult;
+    } catch (e) {
+      _isLoading = false;
+      _isLocating = false;
+      // Jangan mengklaim lokasi diperoleh jika request API gagal
+      _isDeviceLocation = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return LocationResult(
+        status: LocationStatus.locationError,
+        errorMessage: _errorMessage,
+      );
+    }
+  }
+
+  /// Menghapus pesan error aktif
+  void clearError() {
+    if (_errorMessage != null) {
+      _errorMessage = null;
+      notifyListeners();
+    }
+  }
+
   /// Memilih kota aktif dari Halaman Lokasi
   Future<void> selectCity(CityWeather city) async {
+    _isDeviceLocation = false;
     _currentCity = city.cityName;
     _currentLocationCity = city.copyWith(
       isCurrentLocation: true,

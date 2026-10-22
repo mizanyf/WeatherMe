@@ -8,6 +8,7 @@ import '../widgets/add_city_bottom_sheet.dart';
 import '../widgets/app_background.dart';
 import '../widgets/city_search_bar.dart';
 import '../widgets/current_location_card.dart';
+import '../widgets/location_feedback_dialog.dart';
 import '../widgets/locations_header.dart';
 import '../widgets/saved_city_card.dart';
 import '../widgets/top_header.dart';
@@ -44,6 +45,50 @@ class _LocationsScreenState extends State<LocationsScreen> {
     });
   }
 
+  Future<void> _useMyLocation() async {
+    final result = await _controller.fetchWeatherByCurrentLocation();
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Lokasi terdeteksi: ${_controller.currentCity}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: AppColors.secondary,
+        ),
+      );
+    } else {
+      LocationFeedbackDialog.show(
+        context,
+        result: result,
+        onManualSearchSelected: () {
+          _openAddCitySheet();
+        },
+        onRetry: () => _useMyLocation(),
+      );
+    }
+  }
+
   void _openAddCitySheet() {
     showModalBottomSheet(
       context: context,
@@ -52,6 +97,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
       builder: (context) {
         return AddCityBottomSheet(
           currentSavedCities: _controller.savedCities,
+          onUseMyLocation: _useMyLocation,
           onCityAdded: (newCity) {
             _controller.addSavedCity(newCity);
 
@@ -158,10 +204,76 @@ class _LocationsScreenState extends State<LocationsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // 1. Top Header
-                          TopHeader(onSettingsTap: _onSettingsTap),
+                          TopHeader(
+                            onSettingsTap: _onSettingsTap,
+                            onLocationTap: _useMyLocation,
+                            isLocating: _controller.isLocating,
+                            isDeviceLocation: _controller.isDeviceLocation,
+                          ),
 
                           // 2. Locations Header
                           const LocationsHeader(),
+
+                          if (_controller.errorMessage != null)
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 20.0,
+                                vertical: 4.0,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14.0,
+                                vertical: 8.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(12.0),
+                                border: Border.all(
+                                  color: const Color(0xFFFECACA),
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 16,
+                                    color: Color(0xFFDC2626),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _controller.errorMessage!,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFFB91C1C),
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: _useMyLocation,
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      child: Text(
+                                        'Coba Lagi',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFFDC2626),
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
 
                           const SizedBox(height: 6),
 
@@ -178,6 +290,9 @@ class _LocationsScreenState extends State<LocationsScreen> {
                           if (_searchQuery.isEmpty)
                             CurrentLocationCard(
                               city: _controller.currentLocationCity,
+                              onUseLocationTap: _useMyLocation,
+                              isLocating: _controller.isLocating,
+                              isDeviceLocation: _controller.isDeviceLocation,
                             ),
 
                           const SizedBox(height: 10),

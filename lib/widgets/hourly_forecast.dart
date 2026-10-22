@@ -82,7 +82,7 @@ class _HourlyForecastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isHighlighted = item.isCurrent;
+    final bool isHighlighted = (item.isCurrent as dynamic) == true;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20.0),

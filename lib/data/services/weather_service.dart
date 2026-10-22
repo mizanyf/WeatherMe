@@ -40,7 +40,20 @@ class WeatherService {
   }) async {
     _validateApiKey();
 
-    // 1. Coba WeatherAPI.com
+    final bool isOpenWeatherKey =
+        RegExp(r'^[a-fA-F0-9]{32}$').hasMatch(ApiConfig.apiKey);
+
+    // 1. Jika API Key adalah format 32-hex khas OpenWeatherMap, coba OpenWeatherMap lebih dulu
+    if (isOpenWeatherKey) {
+      final openWeatherRes = await _tryOpenWeatherMap(query);
+      if (openWeatherRes != null) {
+        lastForecastResponse = openWeatherRes;
+        return openWeatherRes;
+      }
+    }
+
+    // 2. Coba WeatherAPI.com
+    WeatherApiException? weatherApiException;
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.forecastEndpoint}')
           .replace(queryParameters: {
@@ -49,6 +62,7 @@ class WeatherService {
         'days': days.toString(),
         'aqi': 'no',
         'alerts': 'no',
+        'lang': 'id',
       });
 
       final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
@@ -56,7 +70,15 @@ class WeatherService {
         final result = _processResponse(response);
         lastForecastResponse = result;
         return result;
+      } else {
+        try {
+          _handleHttpError(response.statusCode, response.body);
+        } on WeatherApiException catch (e) {
+          weatherApiException = e;
+        }
       }
+    } on WeatherApiException catch (e) {
+      weatherApiException = e;
     } on SocketException {
       throw const WeatherApiException(
         'Koneksi internet bermasalah. Periksa jaringan Anda.',
@@ -67,11 +89,17 @@ class WeatherService {
       );
     } catch (_) {}
 
-    // 2. Coba OpenWeatherMap jika WeatherAPI belum berhasil (misal key OpenWeatherMap)
-    final openWeatherRes = await _tryOpenWeatherMap(query);
-    if (openWeatherRes != null) {
-      lastForecastResponse = openWeatherRes;
-      return openWeatherRes;
+    // 3. Coba fallback OpenWeatherMap jika belum dicoba
+    if (!isOpenWeatherKey) {
+      final openWeatherRes = await _tryOpenWeatherMap(query);
+      if (openWeatherRes != null) {
+        lastForecastResponse = openWeatherRes;
+        return openWeatherRes;
+      }
+    }
+
+    if (weatherApiException != null) {
+      throw weatherApiException;
     }
 
     throw const WeatherApiException(
@@ -85,6 +113,16 @@ class WeatherService {
   }) async {
     _validateApiKey();
 
+    final bool isOpenWeatherKey =
+        RegExp(r'^[a-fA-F0-9]{32}$').hasMatch(ApiConfig.apiKey);
+
+    if (isOpenWeatherKey) {
+      final openWeatherRes = await _tryOpenWeatherMap(query);
+      if (openWeatherRes != null) {
+        return openWeatherRes;
+      }
+    }
+
     // 1. Coba WeatherAPI.com
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.currentEndpoint}')
@@ -92,6 +130,7 @@ class WeatherService {
         'key': ApiConfig.apiKey,
         'q': query,
         'aqi': 'no',
+        'lang': 'id',
       });
 
       final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
@@ -100,10 +139,12 @@ class WeatherService {
       }
     } catch (_) {}
 
-    // 2. Coba OpenWeatherMap
-    final openWeatherRes = await _tryOpenWeatherMap(query);
-    if (openWeatherRes != null) {
-      return openWeatherRes;
+    // 2. Coba OpenWeatherMap jika belum dicoba
+    if (!isOpenWeatherKey) {
+      final openWeatherRes = await _tryOpenWeatherMap(query);
+      if (openWeatherRes != null) {
+        return openWeatherRes;
+      }
     }
 
     throw const WeatherApiException(
@@ -113,15 +154,25 @@ class WeatherService {
 
   /// Mencari lokasi atau kota berdasarkan kata kunci
   Future<List<Map<String, dynamic>>> searchLocations(String query) async {
-    if (query.trim().isEmpty) return [];
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return [];
     _validateApiKey();
 
-    // 1. Coba WeatherAPI.com /search.json
+    final bool isOpenWeatherKey =
+        RegExp(r'^[a-fA-F0-9]{32}$').hasMatch(ApiConfig.apiKey);
+
+    // 1. Jika API Key adalah format OpenWeatherMap, coba geocoding OpenWeatherMap lebih dulu
+    if (isOpenWeatherKey) {
+      final owmResults = await _searchOpenWeather(trimmed);
+      if (owmResults.isNotEmpty) return owmResults;
+    }
+
+    // 2. Coba WeatherAPI.com /search.json
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.searchEndpoint}')
           .replace(queryParameters: {
         'key': ApiConfig.apiKey,
-        'q': query.trim(),
+        'q': trimmed,
       });
 
       final response = await _client.get(uri).timeout(ApiConfig.requestTimeout);
@@ -133,24 +184,47 @@ class WeatherService {
       }
     } catch (_) {}
 
-    // 2. Coba OpenWeatherMap geocoding
+    // 3. Fallback OpenWeatherMap jika belum dicoba
+    if (!isOpenWeatherKey) {
+      final owmResults = await _searchOpenWeather(trimmed);
+      if (owmResults.isNotEmpty) return owmResults;
+    }
+
+    return [];
+  }
+
+  Future<List<Map<String, dynamic>>> _searchOpenWeather(String query) async {
     try {
       final geoUri = Uri.parse('https://api.openweathermap.org/geo/1.0/direct')
           .replace(queryParameters: {
-        'q': query.trim(),
+        'q': query,
         'limit': '5',
         'appid': ApiConfig.apiKey,
       });
 
-      final response = await _client.get(geoUri).timeout(ApiConfig.requestTimeout);
+      final response =
+          await _client.get(geoUri).timeout(ApiConfig.requestTimeout);
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is List) {
-          return decoded.cast<Map<String, dynamic>>();
+          return decoded.map<Map<String, dynamic>>((item) {
+            final map = item as Map<String, dynamic>;
+            final rawCountry = map['country']?.toString() ?? '';
+            final countryName = rawCountry == 'ID' ? 'Indonesia' : rawCountry;
+            final state = map['state']?.toString();
+            final region = state != null && state.isNotEmpty ? state : countryName;
+
+            return {
+              'name': map['name']?.toString() ?? '',
+              'region': region,
+              'country': countryName,
+              'lat': map['lat'],
+              'lon': map['lon'],
+            };
+          }).toList();
         }
       }
     } catch (_) {}
-
     return [];
   }
 
@@ -160,20 +234,27 @@ class WeatherService {
 
   Future<WeatherApiResponse?> _tryOpenWeatherMap(String query) async {
     try {
+      final isCoords = query.contains(',') &&
+          double.tryParse(query.split(',').first.trim()) != null;
+      final queryParams = <String, String>{
+        'appid': ApiConfig.apiKey,
+        'units': 'metric',
+        'lang': 'id',
+      };
+      if (isCoords) {
+        final parts = query.split(',');
+        queryParams['lat'] = parts[0].trim();
+        queryParams['lon'] = parts[1].trim();
+      } else {
+        queryParams['q'] = query;
+      }
+
       final currentUri =
           Uri.parse('https://api.openweathermap.org/data/2.5/weather')
-              .replace(queryParameters: {
-        'q': query,
-        'appid': ApiConfig.apiKey,
-        'units': 'metric',
-      });
+              .replace(queryParameters: queryParams);
       final forecastUri =
           Uri.parse('https://api.openweathermap.org/data/2.5/forecast')
-              .replace(queryParameters: {
-        'q': query,
-        'appid': ApiConfig.apiKey,
-        'units': 'metric',
-      });
+              .replace(queryParameters: queryParams);
 
       final currentRes =
           await _client.get(currentUri).timeout(ApiConfig.requestTimeout);
