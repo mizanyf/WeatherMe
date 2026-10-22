@@ -358,7 +358,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                           ),
                                           SizedBox(width: 4),
                                           Text(
-                                            'Tambah Kota',
+                                            'Tambah Lokasi',
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,

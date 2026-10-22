@@ -96,7 +96,7 @@ void main() {
 
     // Verify Saved Cities section
     expect(find.text('Kota Tersimpan'), findsOneWidget);
-    expect(find.text('Tambah Kota'), findsOneWidget);
+    expect(find.text('Tambah Lokasi'), findsOneWidget);
     expect(find.text('Jakarta, Indonesia'), findsOneWidget);
     expect(find.text('Tokyo, Jepang'), findsOneWidget);
     expect(find.text('London, Inggris'), findsOneWidget);
