@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weatherme/main.dart';
+import 'package:weatherme/widgets/selected_day_forecast_card.dart';
 
 void main() {
   testWidgets('WeatherMe Home screen smoke test', (WidgetTester tester) async {
@@ -54,8 +55,8 @@ void main() {
     // Verify Monthly calendar header (initial mock is October 2026)
     expect(find.text('Oktober 2026'), findsOneWidget);
 
-    // Verify Fokus Perkiraan section
-    expect(find.text('FOKUS PERKIRAAN'), findsOneWidget);
+    // Verify Selected Day Forecast section
+    expect(find.byType(SelectedDayForecastCard), findsOneWidget);
     expect(find.textContaining('Oktober'), findsWidgets);
     expect(find.text('Hujan'), findsOneWidget);
 

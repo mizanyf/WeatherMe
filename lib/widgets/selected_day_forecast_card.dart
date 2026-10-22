@@ -71,55 +71,37 @@ class SelectedDayForecastCard extends StatelessWidget {
 
               // Card content
               Padding(
-                padding: const EdgeInsets.fromLTRB(22.0, 18.0, 20.0, 18.0),
+                padding: const EdgeInsets.fromLTRB(22.0, 16.0, 20.0, 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Row: Section Label + Date on Left, Condition on Right
+                    // Top Row: Date on Left, Condition on Right
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'FOKUS PERKIRAAN',
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${forecast.dayName}, ${forecast.dateFormatted}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.neutral,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            '${forecast.dayName}, ${forecast.dateFormatted} ${forecast.date.year}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.neutral,
+                              letterSpacing: -0.2,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
 
                         // Condition — clean text, no pill
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2.0),
-                          child: Text(
-                            forecast.condition,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.secondary,
-                            ),
+                        Text(
+                          forecast.condition,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.neutral,
                           ),
                         ),
                       ],
@@ -140,7 +122,7 @@ class SelectedDayForecastCard extends StatelessWidget {
                               '${forecast.temperature}°',
                               style: const TextStyle(
                                 fontFamily: AppTypography.fontFamily,
-                                fontSize: 54,
+                                fontSize: 50,
                                 fontWeight: FontWeight.w700,
                                 height: 1.0,
                                 color: AppColors.neutral,
@@ -177,15 +159,18 @@ class SelectedDayForecastCard extends StatelessWidget {
                           ],
                         ),
 
-                        // Weather Illustration
-                        WeatherIllustration(
-                          size: 96,
-                          conditionType: forecast.conditionType,
+                        // Weather Illustration (proporsional dan tidak mepet ke atas)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0, right: 6.0),
+                          child: WeatherIllustration(
+                            size: 72,
+                            conditionType: forecast.conditionType,
+                          ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
 
                     // Bottom Row: 4 Weather Details
                     Row(
@@ -343,54 +328,37 @@ class SelectedDayForecastCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Label + Day/Date on Left, Badge on Right
+                // Top Row: Day/Date on Left, Badge on Right
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'FOKUS PERKIRAAN',
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${forecast.dayName}, ${forecast.dateFormatted}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.neutral,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        '${forecast.dayName}, ${forecast.dateFormatted} ${forecast.date.year}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.neutral,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2.0),
-                      child: Text(
-                        badgeText,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: badgeColor,
-                          letterSpacing: 0.2,
-                        ),
+                    Text(
+                      badgeText,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: badgeColor,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
 
                 // Middle Info Row
                 Row(
