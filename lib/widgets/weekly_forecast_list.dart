@@ -40,36 +40,6 @@ class WeeklyForecastSection extends StatelessWidget {
                   letterSpacing: -0.2,
                 ),
               ),
-              if (onDetailTap != null)
-                InkWell(
-                  onTap: onDetailTap,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4.0,
-                      vertical: 2.0,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          actionLabel,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 14,
-                          color: AppColors.secondary,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
             ],
           ),
 

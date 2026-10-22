@@ -376,26 +376,15 @@ class SelectedDayForecastCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: badgeColor.withValues(alpha: 0.35),
-                          width: 1,
-                        ),
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2.0),
                       child: Text(
                         badgeText,
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: badgeColor,
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ),
@@ -407,20 +396,8 @@ class SelectedDayForecastCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 54,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: Icon(statusIcon, size: 28, color: badgeColor),
-                    ),
-                    const SizedBox(width: 16),
+                    Icon(statusIcon, size: 36, color: badgeColor),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

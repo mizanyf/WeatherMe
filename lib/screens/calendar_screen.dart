@@ -57,23 +57,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  void _onDetailActionTap() {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _controller.isUsingApiData
-              ? 'Prakiraan 7 hari sinkron dengan WeatherAPI.com'
-              : 'Prakiraan 7 Hari Lengkap (Mode Demo)',
-        ),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: AppColors.neutral,
-      ),
-    );
-  }
-
   void _onLocationTap() {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -150,7 +133,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           // 5. Seven-Day Forecast List (Prakiraan 7 Hari Mendatang)
                           WeeklyForecastSection(
                             weeklyList: _controller.weeklyForecasts,
-                            onDetailTap: _onDetailActionTap,
                           ),
 
                           const SizedBox(height: 14),

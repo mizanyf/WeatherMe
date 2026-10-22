@@ -26,8 +26,8 @@ void main() {
     // Verify hourly forecast title
     expect(find.text('Prakiraan Hari Ini'), findsOneWidget);
 
-    // Verify multi-day forecast title (sama seperti halaman kalender)
-    expect(find.text('Prakiraan 7 Hari Mendatang'), findsOneWidget);
+    // Verify multi-day forecast title (3 hari mendatang di beranda)
+    expect(find.text('Prakiraan 3 Hari Mendatang'), findsOneWidget);
 
     // Verify bottom navigation items
     expect(find.text('Beranda'), findsOneWidget);
@@ -59,9 +59,9 @@ void main() {
     expect(find.textContaining('Oktober'), findsWidgets);
     expect(find.text('Hujan'), findsOneWidget);
 
-    // Verify 7-day forecast section
+    // Verify 7-day forecast section (tanpa tombol Detail)
     expect(find.text('Prakiraan 7 Hari Mendatang'), findsOneWidget);
-    expect(find.text('Detail'), findsOneWidget);
+    expect(find.text('Detail'), findsNothing);
 
     // Tap 'Beranda' to navigate back to Home
     await tester.tap(find.text('Beranda'));
