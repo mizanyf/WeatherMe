@@ -119,7 +119,8 @@ WeatherMe mendukung sinkronisasi data cuaca langsung (*live data*) dari penyedia
 | **Networking** | [`http: ^1.6.0`](https://pub.dev/packages/http) | Komunikasi HTTP REST API |
 | **Environment** | [`flutter_dotenv: ^6.0.1`](https://pub.dev/packages/flutter_dotenv) | Pengelolaan API Key melalui berkas `.env` aman |
 | **Geolokasi** | [`geolocator: ^14.1.2`](https://pub.dev/packages/geolocator) | Akses GPS dan koordinat perangkat |
-| **Ikon** | `cupertino_icons` & Material Icons | Kumpulan ikon modern iOS & Android |
+| **Ikon Launcher** | [`flutter_launcher_icons: ^0.14.3`](https://pub.dev/packages/flutter_launcher_icons) | Otomatisasi generate ikon launcher Android, iOS, Web, & Desktop |
+| **Ikon UI** | `cupertino_icons` & Material Icons | Kumpulan ikon modern iOS & Android |
 | **Tipografi** | [Outfit Font](https://fonts.google.com/specimen/Outfit) | Tipografi sans-serif modern |
 | **Testing** | `flutter_test` | Pengujian unit test dan widget test otomatis |
 
@@ -233,6 +234,24 @@ flutter run -d chrome
 
 # Menjalankan pada perangkat fisik / emulator aktif
 flutter run
+```
+
+### 6. Build Rilis Aplikasi & Ikon Launcher
+Ikon aplikasi telah dikonfigurasi dan digenerate otomatis menggunakan logo resmi [`assets/logo/WeatherMe.png`](assets/logo/WeatherMe.png). Jika Anda memperbarui logo aplikasi di masa mendatang, jalankan perintah berikut untuk memperbarui ikon seluruh platform:
+```bash
+dart run flutter_launcher_icons
+```
+
+Untuk mengompilasi aplikasi ke format rilis siap distribusi:
+```bash
+# Android App Bundle (Google Play Store)
+flutter build appbundle --release
+
+# Android APK Standalone
+flutter build apk --release
+
+# Web Production Build
+flutter build web --release
 ```
 
 ---
