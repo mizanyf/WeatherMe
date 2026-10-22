@@ -89,22 +89,40 @@ class _HourlyForecastCard extends StatelessWidget {
                 ? const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFE0F7FC), Color(0xFFBAE6FD)],
+                    colors: [
+                      Color(0xFFBAE6FD),
+                      Color(0xFFE0F7FC),
+                      Color(0xFF7DD3FC),
+                    ],
+                    stops: [0.0, 0.50, 1.0],
                   )
-                : null,
-            color: isHighlighted ? null : AppColors.glassFill,
+                : const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFFE0F7FC),
+                      Color(0xFFF0FDFE),
+                      Color(0xFFBAE6FD),
+                    ],
+                    stops: [0.0, 0.55, 1.0],
+                  ),
             borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: isHighlighted ? Colors.white : AppColors.glassBorder,
-              width: isHighlighted ? 1.2 : 0.8,
+              width: isHighlighted ? 1.4 : 1.0,
             ),
             boxShadow: [
               BoxShadow(
                 color: isHighlighted
-                    ? AppColors.primary.withValues(alpha: 0.25)
-                    : AppColors.shadow,
-                blurRadius: isHighlighted ? 14 : 10,
+                    ? AppColors.primary.withValues(alpha: 0.28)
+                    : AppColors.primary.withValues(alpha: 0.10),
+                blurRadius: isHighlighted ? 16 : 12,
                 offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),

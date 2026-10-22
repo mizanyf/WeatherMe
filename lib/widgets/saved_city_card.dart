@@ -35,14 +35,28 @@ class SavedCityCard extends StatelessWidget {
               vertical: 14.0,
             ),
             decoration: BoxDecoration(
-              color: AppColors.glassFill,
               borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(color: AppColors.glassBorder, width: 1.0),
+              border: Border.all(color: AppColors.glassBorder, width: 1.2),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE0F7FC), // Soft Ice Sky
+                  Color(0xFFF0FDFE), // Frosted Pure White-Blue
+                  Color(0xFFBAE6FD), // Ambient Blue Accent
+                ],
+                stops: [0.0, 0.55, 1.0],
+              ),
               boxShadow: [
                 BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
                   color: AppColors.shadow,
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),

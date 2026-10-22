@@ -27,7 +27,7 @@ void main() {
     expect(find.text('Perkiraan Hari Ini'), findsOneWidget);
 
     // Verify multi-day forecast title (3 hari mendatang di beranda)
-    expect(find.text('Prakiraan 3 Hari Mendatang'), findsOneWidget);
+    expect(find.text('Perkiraan 3 Hari Mendatang'), findsOneWidget);
 
     // Verify bottom navigation items
     expect(find.text('Beranda'), findsOneWidget);
@@ -47,20 +47,20 @@ void main() {
     // Verify Calendar screen title and subtitle
     expect(find.text('Kalender Cuaca'), findsOneWidget);
     expect(
-      find.text('Rencanakan harimu dengan prakiraan cuaca'),
+      find.text('Rencanakan harimu dengan perkiraan cuaca'),
       findsOneWidget,
     );
 
     // Verify Monthly calendar header (initial mock is October 2026)
     expect(find.text('Oktober 2026'), findsOneWidget);
 
-    // Verify Fokus Prakiraan section
-    expect(find.text('FOKUS PRAKIRAAN'), findsOneWidget);
+    // Verify Fokus Perkiraan section
+    expect(find.text('FOKUS PERKIRAAN'), findsOneWidget);
     expect(find.textContaining('Oktober'), findsWidgets);
     expect(find.text('Hujan'), findsOneWidget);
 
     // Verify 7-day forecast section (tanpa tombol Detail)
-    expect(find.text('Prakiraan 7 Hari Mendatang'), findsOneWidget);
+    expect(find.text('Perkiraan 7 Hari Mendatang'), findsOneWidget);
     expect(find.text('Detail'), findsNothing);
 
     // Tap 'Beranda' to navigate back to Home

@@ -15,7 +15,7 @@ class WeeklyForecastSection extends StatelessWidget {
   const WeeklyForecastSection({
     super.key,
     required this.weeklyList,
-    this.title = 'Prakiraan 7 Hari Mendatang',
+    this.title = 'Perkiraan 7 Hari Mendatang',
     this.actionLabel = 'Detail',
     this.onDetailTap,
   });
@@ -60,14 +60,28 @@ class WeeklyForecastSection extends StatelessWidget {
                   vertical: 4.0,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.glassFill,
                   borderRadius: BorderRadius.circular(24.0),
-                  border: Border.all(color: AppColors.glassBorder, width: 1.0),
+                  border: Border.all(color: AppColors.glassBorder, width: 1.2),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFFE0F7FC), // Soft Ice Sky
+                      Color(0xFFF0FDFE), // Frosted Pure White-Blue
+                      Color(0xFFBAE6FD), // Ambient Blue Accent
+                    ],
+                    stops: [0.0, 0.55, 1.0],
+                  ),
                   boxShadow: [
                     BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
                       color: AppColors.shadow,
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),

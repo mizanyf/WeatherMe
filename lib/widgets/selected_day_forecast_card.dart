@@ -85,7 +85,7 @@ class SelectedDayForecastCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'FOKUS PRAKIRAAN',
+                                'FOKUS PERKIRAAN',
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w800,
@@ -298,10 +298,10 @@ class SelectedDayForecastCard extends StatelessWidget {
     final IconData statusIcon =
         isExpired ? Icons.history_toggle_off_rounded : Icons.schedule_rounded;
     final String titleText =
-        isExpired ? 'Prakiraan Telah Berlalu' : 'Prakiraan Belum Tersedia';
+        isExpired ? 'Perkiraan Telah Berlalu' : 'Perkiraan Belum Tersedia';
     final String descText = isExpired
-        ? 'Data prakiraan cuaca untuk tanggal ini sudah terlewat. Aplikasi hanya menampilkan riwayat hingga 7 hari ke belakang.'
-        : 'Prakiraan cuaca untuk tanggal ini belum tersedia. Prakiraan cuaca akurat hanya dapat diprediksi hingga 7 hari ke depan.';
+        ? 'Data perkiraan cuaca untuk tanggal ini sudah terlewat. Aplikasi hanya menampilkan riwayat hingga 7 hari ke belakang.'
+        : 'Perkiraan cuaca untuk tanggal ini belum tersedia. Perkiraan cuaca akurat hanya dapat diprediksi hingga 7 hari ke depan.';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
@@ -352,7 +352,7 @@ class SelectedDayForecastCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'FOKUS PRAKIRAAN',
+                            'FOKUS PERKIRAAN',
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w800,

@@ -192,11 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             const SizedBox(height: 14),
 
-                            // 5. Prakiraan 3 Hari ke Depan (termasuk hari ini)
+                            // 5. Perkiraan 3 Hari ke Depan (termasuk hari ini)
                             WeeklyForecastSection(
                               weeklyList:
                                   _controller.weeklyForecasts.take(3).toList(),
-                              title: 'Prakiraan 3 Hari Mendatang',
+                              title: 'Perkiraan 3 Hari Mendatang',
                             ),
                           ],
                         ),

@@ -202,15 +202,19 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.75),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  width: 1.0,
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Color(0xFF48CBE8), // AppColors.primary
+                                    Color(0xFF0284C7), // AppColors.secondary
+                                  ],
                                 ),
+                                borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.12),
+                                    color: const Color(0xFF0284C7)
+                                        .withValues(alpha: 0.25),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -219,7 +223,7 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
                               child: const Icon(
                                 Icons.calendar_today_rounded,
                                 size: 16,
-                                color: AppColors.secondary,
+                                color: Colors.white,
                               ),
                             ),
                             const SizedBox(width: 8),

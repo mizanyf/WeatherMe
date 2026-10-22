@@ -34,7 +34,7 @@ class CalendarHeader extends StatelessWidget {
 
           // Subtitle
           const Text(
-            'Rencanakan harimu dengan prakiraan cuaca',
+            'Rencanakan harimu dengan perkiraan cuaca',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
