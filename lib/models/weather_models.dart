@@ -229,6 +229,34 @@ class CalendarDayForecast {
     required this.uvIndex,
   });
 
+  /// Memeriksa apakah tanggal berada dalam jendela prakiraan aktif (7 hari ke belakang hingga 7 hari ke depan)
+  bool get isAvailable {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+    final minDate = today.subtract(const Duration(days: 7));
+    final maxDate = today.add(const Duration(days: 7));
+    return !target.isBefore(minDate) && !target.isAfter(maxDate);
+  }
+
+  /// Memeriksa apakah tanggal sudah lewat lebih dari 7 hari ke belakang (prediksi sudah hilang/kedaluwarsa)
+  bool get isPastExpired {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+    final minDate = today.subtract(const Duration(days: 7));
+    return target.isBefore(minDate);
+  }
+
+  /// Memeriksa apakah tanggal lebih dari 7 hari ke depan (prediksi belum muncul/tersedia)
+  bool get isFutureUnavailable {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+    final maxDate = today.add(const Duration(days: 7));
+    return target.isAfter(maxDate);
+  }
+
   // Default initial mock for Wednesday, 21 October 2026
   static final CalendarDayForecast initial = CalendarDayForecast(
     date: DateTime(2026, 10, 21),

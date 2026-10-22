@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../data/models/weather_model.dart';
 import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
@@ -103,65 +102,15 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
     widget.onDateSelected(date);
   }
 
-  /// Helper to determine weather icon for a date
+  /// Menentukan icon cuaca untuk tanggal di kalender.
+  /// Sesuai instruksi: hanya tanggal dalam jendela 7 hari ke belakang dan 7 hari ke depan dari hari ini yang memiliki icon.
+  /// Selain itu (terlalu lampau atau terlalu jauh ke depan), prediksinya hilang/belum muncul (return null).
   WeatherConditionType? _getConditionForDate(DateTime date) {
-    final now = DateTime.now();
-    final bool isToday =
-        date.year == now.year && date.month == now.month && date.day == now.day;
-    final controller = WeatherController.instance;
-
-    // Untuk hari ini, selalu sinkron dengan Beranda
-    if (isToday && controller.isUsingApiData) {
-      if (controller.weatherData != null) {
-        return WeatherApiResponse.mapConditionType(
-          controller.weatherData!.conditionCode,
-          controller.currentWeather.condition,
-        );
-      }
-      return WeatherConditionType.sunny;
+    final forecast = WeatherController.instance.getForecastForDate(date);
+    if (!forecast.isAvailable) {
+      return null;
     }
-
-    // 1. Periksa data perkiraan dari API aktual jika tersedia
-    if (controller.isUsingApiData && controller.calendarForecastMap.isNotEmpty) {
-      for (final f in controller.calendarForecastMap.values) {
-        if (f.date.year == date.year &&
-            f.date.month == date.month &&
-            f.date.day == date.day) {
-          return f.conditionType;
-        }
-      }
-      if (controller.calendarForecastMap.containsKey(date.day)) {
-        final f = controller.calendarForecastMap[date.day]!;
-        if (f.date.month == date.month) {
-          return f.conditionType;
-        }
-      }
-    }
-
-    // 2. Fallback untuk data mock kalender Oktober 2026
-    if (date.year == 2026 && date.month == 10) {
-      if (CalendarDayForecast.mockOctober.containsKey(date.day)) {
-        return CalendarDayForecast.mockOctober[date.day]?.conditionType;
-      }
-      if (date.day >= 7 && date.day <= 13) {
-        if (date.day == 9) return WeatherConditionType.cloudy;
-        if (date.day == 10) return WeatherConditionType.rainy;
-        return WeatherConditionType.sunny;
-      }
-      if (date.day >= 14 && date.day <= 20) {
-        if (date.day == 15 || date.day == 20) {
-          return WeatherConditionType.cloudy;
-        }
-        return WeatherConditionType.sunny;
-      }
-      if (date.day >= 28 && date.day <= 31) {
-        if (date.day == 29) return WeatherConditionType.partlyCloudy;
-        if (date.day == 30) return WeatherConditionType.rainy;
-        if (date.day == 31) return WeatherConditionType.cloudy;
-        return WeatherConditionType.sunny;
-      }
-    }
-    return null;
+    return forecast.conditionType;
   }
 
   @override
@@ -506,14 +455,18 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                color: isSelected ? Colors.white : AppColors.neutral,
+                color: isSelected
+                    ? Colors.white
+                    : (condition != null
+                        ? AppColors.neutral
+                        : AppColors.mutedText.withValues(alpha: 0.50)),
               ),
             ),
             const SizedBox(height: 2),
             if (condition != null)
               _buildSmallWeatherIcon(condition, isSelected)
             else
-              const SizedBox(height: 12),
+              const SizedBox(height: 13),
           ],
         ),
       ),
@@ -528,32 +481,86 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
       case WeatherConditionType.sunny:
         return Icon(
           Icons.wb_sunny_rounded,
-          size: 11,
-          color: isSelected ? Colors.white : AppColors.sunnyYellow,
+          size: 13,
+          color: isSelected ? Colors.white : const Color(0xFFF59E0B),
         );
+
       case WeatherConditionType.partlyCloudy:
-        return Icon(
-          Icons.wb_cloudy_rounded,
-          size: 11,
-          color: isSelected ? Colors.white : const Color(0xFF0284C7),
+        return SizedBox(
+          width: 15,
+          height: 13,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Icon(
+                  Icons.wb_sunny_rounded,
+                  size: 9,
+                  color: isSelected ? Colors.white : const Color(0xFFF59E0B),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                bottom: 0,
+                child: Icon(
+                  Icons.cloud_rounded,
+                  size: 10,
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.90)
+                      : const Color(0xFF38BDF8),
+                ),
+              ),
+            ],
+          ),
         );
+
       case WeatherConditionType.cloudy:
         return Icon(
           Icons.cloud_rounded,
-          size: 11,
+          size: 13,
           color: isSelected ? Colors.white : const Color(0xFF38BDF8),
         );
+
       case WeatherConditionType.overcast:
         return Icon(
           Icons.cloud_rounded,
-          size: 11,
-          color: isSelected ? Colors.white : const Color(0xFF64748B),
+          size: 13,
+          color: isSelected
+              ? Colors.white
+              : const Color(0xFF64748B),
         );
+
       case WeatherConditionType.rainy:
-        return Icon(
-          Icons.grain_rounded,
-          size: 11,
-          color: isSelected ? Colors.white : AppColors.secondary,
+        return SizedBox(
+          width: 15,
+          height: 13,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: 0,
+                top: 0,
+                child: Icon(
+                  Icons.cloud_rounded,
+                  size: 10,
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : const Color(0xFF64748B),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Icon(
+                  Icons.water_drop_rounded,
+                  size: 7,
+                  color: isSelected ? Colors.white : const Color(0xFF0284C7),
+                ),
+              ),
+            ],
+          ),
         );
     }
   }

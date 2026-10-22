@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'locations_screen.dart';
-import '../data/models/weather_model.dart';
 import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
@@ -32,107 +31,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   CalendarDayForecast _getForecastForDate(DateTime date) {
-    final now = DateTime.now();
-    final bool isToday =
-        date.year == now.year && date.month == now.month && date.day == now.day;
-
-    // 1. Cek apakah tanggal tersedia dari respons API aktual
-    if (_controller.isUsingApiData) {
-      if (isToday) {
-        final cw = _controller.currentWeather;
-        final cType = _controller.weatherData != null
-            ? WeatherApiResponse.mapConditionType(
-                _controller.weatherData!.conditionCode,
-                cw.condition,
-              )
-            : WeatherConditionType.sunny;
-
-        final cachedToday = _controller.calendarForecastMap[date.day];
-
-        return CalendarDayForecast(
-          date: date,
-          dayName: cachedToday?.dayName ?? 'Hari ini',
-          dateFormatted: cachedToday?.dateFormatted ?? cw.dateTime,
-          condition: cw.condition,
-          conditionType: cType,
-          temperature: cw.temperature,
-          maxTemp: cw.maxTemp,
-          minTemp: cw.minTemp,
-          rainChance: cw.safeRainChance,
-          humidity: '${cw.humidity}%',
-          windSpeed: '${cw.windSpeed} km/j',
-          uvIndex: cw.safeUvIndex,
-        );
-      }
-
-      if (_controller.calendarForecastMap.isNotEmpty) {
-        for (final f in _controller.calendarForecastMap.values) {
-          if (f.date.year == date.year &&
-              f.date.month == date.month &&
-              f.date.day == date.day) {
-            return f;
-          }
-        }
-        if (_controller.calendarForecastMap.containsKey(date.day)) {
-          final f = _controller.calendarForecastMap[date.day]!;
-          if (f.date.month == date.month) {
-            return f;
-          }
-        }
-      }
-    }
-
-    // 2. Fallback ke data mock kalender Oktober 2026
-    if (date.year == 2026 &&
-        date.month == 10 &&
-        CalendarDayForecast.mockOctober.containsKey(date.day)) {
-      return CalendarDayForecast.mockOctober[date.day]!;
-    }
-
-    // 3. Dynamic fallback mock untuk tanggal lainnya agar selalu sesuai hari & tanggal
-    const dayNames = [
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Minggu',
-    ];
-    const monthNames = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-
-    final dayIndex = (date.weekday - 1).clamp(0, 6);
-    final monthIndex = (date.month - 1).clamp(0, 11);
-    final dayName = dayNames[dayIndex];
-    final dateFormatted = '${date.day} ${monthNames[monthIndex]}';
-
-    return CalendarDayForecast(
-      date: date,
-      dayName: dayName,
-      dateFormatted: dateFormatted,
-      condition: 'Cerah Berawan',
-      conditionType: WeatherConditionType.partlyCloudy,
-      temperature: 28,
-      maxTemp: 30,
-      minTemp: 21,
-      rainChance: '5%',
-      humidity: '65%',
-      windSpeed: '11 km/j',
-      uvIndex: 'Sedang 6',
-    );
+    return _controller.getForecastForDate(date);
   }
 
   void _onDateSelected(DateTime date) {

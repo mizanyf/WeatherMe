@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weatherme/core/config/api_config.dart';
 import 'package:weatherme/data/models/weather_model.dart';
+import 'package:weatherme/models/weather_models.dart';
 
 void main() {
   group('ApiConfig Tests', () {
@@ -153,6 +154,106 @@ void main() {
         expect(response.hourlyList[i].time, expectedHourStr);
         expect(response.hourlyList[i].isCurrent, isFalse);
       }
+    });
+  });
+
+  group('Calendar Forecast Window Tests', () {
+    test('CalendarDayForecast availability flags for 7-day past and 7-day future window', () {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // Today should be available
+      final todayForecast = CalendarDayForecast(
+        date: today,
+        dayName: 'Hari Ini',
+        dateFormatted: '22 Okt',
+        condition: 'Cerah',
+        conditionType: WeatherConditionType.sunny,
+        temperature: 28,
+        maxTemp: 30,
+        minTemp: 22,
+        humidity: '70%',
+        windSpeed: '10 km/j',
+        rainChance: '10%',
+        uvIndex: 'Tinggi 6',
+      );
+      expect(todayForecast.isAvailable, isTrue);
+      expect(todayForecast.isPastExpired, isFalse);
+      expect(todayForecast.isFutureUnavailable, isFalse);
+
+      // 7 days ago should be available (boundary)
+      final past7DaysForecast = CalendarDayForecast(
+        date: today.subtract(const Duration(days: 7)),
+        dayName: '7 Hari Lalu',
+        dateFormatted: '15 Okt',
+        condition: 'Cerah',
+        conditionType: WeatherConditionType.sunny,
+        temperature: 28,
+        maxTemp: 30,
+        minTemp: 22,
+        humidity: '70%',
+        windSpeed: '10 km/j',
+        rainChance: '10%',
+        uvIndex: 'Tinggi 6',
+      );
+      expect(past7DaysForecast.isAvailable, isTrue);
+      expect(past7DaysForecast.isPastExpired, isFalse);
+
+      // 8 days ago should be expired
+      final past8DaysForecast = CalendarDayForecast(
+        date: today.subtract(const Duration(days: 8)),
+        dayName: '8 Hari Lalu',
+        dateFormatted: '14 Okt',
+        condition: 'Cerah',
+        conditionType: WeatherConditionType.sunny,
+        temperature: 28,
+        maxTemp: 30,
+        minTemp: 22,
+        humidity: '70%',
+        windSpeed: '10 km/j',
+        rainChance: '10%',
+        uvIndex: 'Tinggi 6',
+      );
+      expect(past8DaysForecast.isAvailable, isFalse);
+      expect(past8DaysForecast.isPastExpired, isTrue);
+      expect(past8DaysForecast.isFutureUnavailable, isFalse);
+
+      // 7 days in future should be available (boundary)
+      final future7DaysForecast = CalendarDayForecast(
+        date: today.add(const Duration(days: 7)),
+        dayName: '7 Hari Kedepan',
+        dateFormatted: '29 Okt',
+        condition: 'Cerah',
+        conditionType: WeatherConditionType.sunny,
+        temperature: 28,
+        maxTemp: 30,
+        minTemp: 22,
+        humidity: '70%',
+        windSpeed: '10 km/j',
+        rainChance: '10%',
+        uvIndex: 'Tinggi 6',
+      );
+      expect(future7DaysForecast.isAvailable, isTrue);
+      expect(future7DaysForecast.isFutureUnavailable, isFalse);
+
+      // 8 days in future should be unavailable
+      final future8DaysForecast = CalendarDayForecast(
+        date: today.add(const Duration(days: 8)),
+        dayName: '8 Hari Kedepan',
+        dateFormatted: '30 Okt',
+        condition: 'Cerah',
+        conditionType: WeatherConditionType.sunny,
+        temperature: 28,
+        maxTemp: 30,
+        minTemp: 22,
+        humidity: '70%',
+        windSpeed: '10 km/j',
+        rainChance: '10%',
+        uvIndex: 'Tinggi 6',
+      );
+      expect(future8DaysForecast.isAvailable, isFalse);
+      expect(future8DaysForecast.isPastExpired, isFalse);
+      expect(future8DaysForecast.isFutureUnavailable, isTrue);
     });
   });
 }

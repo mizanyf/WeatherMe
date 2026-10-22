@@ -14,6 +14,10 @@ class SelectedDayForecastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!forecast.isAvailable) {
+      return _buildUnavailableCard(context);
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -76,30 +80,35 @@ class SelectedDayForecastCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'FOKUS PRAKIRAAN',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                                letterSpacing: 0.8,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'FOKUS PRAKIRAAN',
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                  letterSpacing: 0.8,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${forecast.dayName}, ${forecast.dateFormatted}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.neutral,
-                                letterSpacing: -0.3,
+                              const SizedBox(height: 4),
+                              Text(
+                                '${forecast.dayName}, ${forecast.dateFormatted}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.neutral,
+                                  letterSpacing: -0.3,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
 
                         // Condition — clean text, no pill
                         Padding(
@@ -277,6 +286,210 @@ class SelectedDayForecastCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUnavailableCard(BuildContext context) {
+    final bool isExpired = forecast.isPastExpired;
+    final String badgeText = isExpired ? 'SUDAH TERLEWAT' : 'BELUM TERSEDIA';
+    final Color badgeColor =
+        isExpired ? const Color(0xFF64748B) : AppColors.primary;
+    final IconData statusIcon =
+        isExpired ? Icons.history_toggle_off_rounded : Icons.schedule_rounded;
+    final String titleText =
+        isExpired ? 'Prakiraan Telah Berlalu' : 'Prakiraan Belum Tersedia';
+    final String descText = isExpired
+        ? 'Data prakiraan cuaca untuk tanggal ini sudah terlewat. Aplikasi hanya menampilkan riwayat hingga 7 hari ke belakang.'
+        : 'Prakiraan cuaca untuk tanggal ini belum tersedia. Prakiraan cuaca akurat hanya dapat diprediksi hingga 7 hari ke depan.';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28.0),
+        border: Border.all(color: AppColors.glassBorder, width: 1.2),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFE0F7FC),
+            Color(0xFFF0FDFE),
+            Color(0xFFBAE6FD),
+          ],
+          stops: [0.0, 0.55, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: AppColors.glassBlurSigmaLight,
+            sigmaY: AppColors.glassBlurSigmaLight,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22.0, 20.0, 20.0, 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Row: Label + Day/Date on Left, Badge on Right
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'FOKUS PRAKIRAAN',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${forecast.dayName}, ${forecast.dateFormatted}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.neutral,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: badgeColor.withValues(alpha: 0.35),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        badgeText,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: badgeColor,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // Middle Info Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.65),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Icon(statusIcon, size: 28, color: badgeColor),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            titleText,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.neutral,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            descText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.mutedText,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+
+                // Bottom Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDetailTile(
+                        icon: Icons.water_drop_outlined,
+                        label: 'Hujan',
+                        value: '-',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildDetailTile(
+                        icon: Icons.water_drop_rounded,
+                        label: 'Kelembapan',
+                        value: '-',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildDetailTile(
+                        icon: Icons.air_rounded,
+                        label: 'Kec. Angin',
+                        value: '-',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildDetailTile(
+                        icon: Icons.wb_sunny_outlined,
+                        label: 'Indeks UV',
+                        value: '-',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
