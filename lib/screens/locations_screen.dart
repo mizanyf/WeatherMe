@@ -321,16 +321,32 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                     borderRadius: BorderRadius.circular(20),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0,
-                                        vertical: 5.0,
+                                        horizontal: 12.0,
+                                        vertical: 6.0,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.65),
+                                        gradient: const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFFE0F7FC),
+                                            Color(0xFFBAE6FD),
+                                          ],
+                                        ),
                                         borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
                                           color: AppColors.glassBorder,
-                                          width: 0.8,
+                                          width: 1.0,
                                         ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
                                       child: const Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -338,15 +354,15 @@ class _LocationsScreenState extends State<LocationsScreen> {
                                           Icon(
                                             Icons.add_rounded,
                                             size: 15,
-                                            color: AppColors.primary,
+                                            color: AppColors.secondary,
                                           ),
                                           SizedBox(width: 4),
                                           Text(
                                             'Tambah Kota',
                                             style: TextStyle(
                                               fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.secondary,
                                             ),
                                           ),
                                         ],

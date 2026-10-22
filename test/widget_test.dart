@@ -88,7 +88,7 @@ void main() {
     );
 
     // Verify search field placeholder
-    expect(find.text('Cari kota atau bandara...'), findsOneWidget);
+    expect(find.text('Cari kota atau negara...'), findsOneWidget);
 
     // Verify Current Location card
     expect(find.text('LOKASI SAAT INI'), findsOneWidget);

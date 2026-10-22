@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/services/weather_controller.dart';
 import '../models/weather_models.dart';
 import '../theme/app_colors.dart';
+import 'weather_icon.dart';
 
 class AddCityBottomSheet extends StatefulWidget {
   final List<CityWeather> currentSavedCities;
@@ -69,7 +70,7 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.75,
+        maxHeight: MediaQuery.of(context).size.height * 0.78,
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32.0)),
@@ -83,11 +84,27 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
               bottom: MediaQuery.of(context).viewInsets.bottom + 20,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.92),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(32.0),
               ),
               border: Border.all(color: AppColors.glassBorder, width: 1.2),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE0F7FC), // Soft Ice Sky
+                  Color(0xFFF0FDFE), // Frosted Pure White-Blue
+                  Color(0xFFBAE6FD), // Ambient Blue Accent
+                ],
+                stops: [0.0, 0.55, 1.0],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.16),
+                  blurRadius: 30,
+                  offset: const Offset(0, -6),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -95,14 +112,14 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
                 // Drag Handle
                 const SizedBox(height: 12),
                 Container(
-                  width: 40,
+                  width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: AppColors.secondary.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 // Header Row
                 Padding(
@@ -110,76 +127,182 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Tambah Kota',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.neutral,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color(0xFF38BDF8),
+                                  Color(0xFF0284C7),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.secondary.withValues(
+                                    alpha: 0.25,
+                                  ),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.add_location_alt_rounded,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            'Tambah Kota',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.neutral,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          color: AppColors.mutedText,
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.glassBorder,
+                            width: 0.8,
+                          ),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            size: 18,
+                            color: AppColors.neutral,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
                       ),
                     ],
                   ),
                 ),
 
-                // Search Field
+                // Search Field & Search Button with Blue Gradient Glass
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 8.0,
+                    vertical: 10.0,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(color: AppColors.border, width: 1.0),
+                      borderRadius: BorderRadius.circular(18.0),
+                      border: Border.all(
+                        color: AppColors.glassBorder,
+                        width: 1.2,
+                      ),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFFFFFFFF),
+                          Color(0xFFE8F7FC),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      autofocus: false,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.neutral,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Cari kota untuk ditambahkan...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.mutedText,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          size: 20,
-                          color: AppColors.mutedText,
-                        ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(
-                                  Icons.cancel_rounded,
-                                  size: 18,
-                                  color: AppColors.mutedText,
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 8),
+                        // Tombol Search dengan Gradasi Biru
+                        InkWell(
+                          onTap: () {
+                            _onSearchChanged(_searchController.text);
+                            FocusScope.of(context).unfocus();
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color(0xFF38BDF8),
+                                  Color(0xFF0284C7),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.secondary.withValues(
+                                    alpha: 0.28,
+                                  ),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
                                 ),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  _onSearchChanged('');
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 12.0,
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.search_rounded,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            autofocus: false,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.neutral,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Cari kota atau negara...',
+                              hintStyle: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.mutedText,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_searchController.text.isNotEmpty)
+                          IconButton(
+                            icon: const Icon(
+                              Icons.cancel_rounded,
+                              size: 18,
+                              color: AppColors.mutedText,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              _onSearchChanged('');
+                            },
+                          ),
+                        const SizedBox(width: 4),
+                      ],
                     ),
                   ),
                 ),
@@ -194,42 +317,92 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
                         Navigator.of(context).pop();
                         widget.onUseMyLocation?.call();
                       },
-                      borderRadius: BorderRadius.circular(16.0),
+                      borderRadius: BorderRadius.circular(18.0),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14.0,
-                          vertical: 10.0,
+                          horizontal: 16.0,
+                          vertical: 12.0,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16.0),
+                          borderRadius: BorderRadius.circular(18.0),
                           border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.25),
-                            width: 1.0,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            width: 1.2,
                           ),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_rounded,
-                              size: 18,
-                              color: AppColors.primary,
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF38BDF8),
+                              Color(0xFF0284C7),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF0284C7).withValues(
+                                alpha: 0.28,
+                              ),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Gunakan Lokasi Saya',
-                                style: TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.22),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.35),
+                                  width: 1.0,
                                 ),
                               ),
+                              child: const Icon(
+                                Icons.my_location_rounded,
+                                size: 18,
+                                color: Colors.white,
+                              ),
                             ),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 13,
-                              color: AppColors.primary,
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Gunakan Lokasi Saya',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 1),
+                                  Text(
+                                    'Deteksi cuaca di posisi GPS Anda saat ini',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFFE0F2FE),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 12,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -260,31 +433,35 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
                           padding: const EdgeInsets.symmetric(horizontal: 20.0),
                           itemCount: _filteredCities.length,
                           separatorBuilder: (context, index) =>
-                              const Divider(height: 1, color: AppColors.border),
+                              const SizedBox(height: 8),
                           itemBuilder: (context, index) {
                             final city = _filteredCities[index];
                             final alreadySaved = _isAlreadySaved(city);
 
-                            return Padding(
+                            return Container(
                               padding: const EdgeInsets.symmetric(
+                                horizontal: 14.0,
                                 vertical: 10.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.65),
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(
+                                  color: AppColors.glassBorder,
+                                  width: 0.9,
+                                ),
                               ),
                               child: Row(
                                 children: [
-                                  // Weather Icon
-                                  Container(
+                                  // Weather Icon matching app theme
+                                  SizedBox(
                                     width: 38,
                                     height: 38,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.tertiary.withValues(
-                                        alpha: 0.45,
+                                    child: Center(
+                                      child: WeatherIcon(
+                                        conditionType: city.conditionType,
+                                        size: 28,
                                       ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.location_city_rounded,
-                                      size: 18,
-                                      color: AppColors.secondary,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -348,38 +525,62 @@ class _AddCityBottomSheetState extends State<AddCityBottomSheet> {
                                       ),
                                     )
                                   else
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        widget.onCityAdded(city);
-                                        Navigator.of(context).pop();
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.secondary,
-                                        foregroundColor: Colors.white,
-                                        elevation: 0,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFF38BDF8),
+                                            Color(0xFF0284C7),
+                                          ],
                                         ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
-                                        ),
-                                      ),
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.add, size: 16),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            'Tambah',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.secondary
+                                                .withValues(alpha: 0.25),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
                                           ),
                                         ],
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            widget.onCityAdded(city);
+                                            Navigator.of(context).pop();
+                                          },
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          child: const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 7,
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.add_rounded,
+                                                  size: 16,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(width: 4),
+                                                Text(
+                                                  'Tambah',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                 ],

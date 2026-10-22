@@ -15,7 +15,7 @@ class CitySearchBar extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onClear,
-    this.hintText = 'Cari kota atau bandara...',
+    this.hintText = 'Cari kota atau negara...',
   });
 
   @override
@@ -31,14 +31,28 @@ class CitySearchBar extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.glassFill,
               borderRadius: BorderRadius.circular(22.0),
-              border: Border.all(color: AppColors.glassBorder, width: 1.0),
+              border: Border.all(color: AppColors.glassBorder, width: 1.2),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE0F7FC), // Soft Ice Sky
+                  Color(0xFFF0FDFE), // Frosted Pure White-Blue
+                  Color(0xFFBAE6FD), // Ambient Blue Accent
+                ],
+                stops: [0.0, 0.55, 1.0],
+              ),
               boxShadow: [
                 BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  blurRadius: 18,
+                  offset: const Offset(0, 5),
+                ),
+                BoxShadow(
                   color: AppColors.shadow,
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -60,7 +74,7 @@ class CitySearchBar extends StatelessWidget {
                 prefixIcon: const Icon(
                   Icons.search_rounded,
                   size: 20,
-                  color: AppColors.mutedText,
+                  color: AppColors.secondary,
                 ),
                 suffixIcon: controller.text.isNotEmpty
                     ? IconButton(
